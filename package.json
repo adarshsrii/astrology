@@ -1,0 +1,30 @@
+{
+  "name": "astrology-insights",
+  "version": "1.0.3",
+  "description": "Astrology Insights for Applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adarshsrii/astrology.git"
+  },
+  "keywords": [
+    "astrology",
+    "astrology",
+    "2024",
+    "insights",
+    "astro"
+  ],
+  "author": "Adarsh Srivastava",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adarshsrii/astrology/issues"
+  },
+  "homepage": "https://github.com/adarshsrii/astrology#readme",
+  "dependencies": {
+    "luxon": "^3.5.0",
+    "suncalc": "^1.9.0"
+  }
+}
