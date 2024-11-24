@@ -1,6 +1,6 @@
 {
   "name": "astrology-insights",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Astrology Insights for Applications.",
   "main": "index.js",
   "scripts": {
