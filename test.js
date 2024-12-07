@@ -3,20 +3,23 @@ const {
     calculateMoonriseMoonset,
     calculateAbhijeetMuhurt,
     calculateChoghadiya,
-
     calculateRahuKalam,
     calculateDurMuhurtam,
-    calculateVarjyam,
-    calculateGulikaKalam,
     calculateYamghantKalam,
+    calculateBioRhythms
 } = require("./index");
 
 // Sample data for testing
-const date = "2024-11-28";
+const date = "2024-12-07";
 const latitude = 28.6139; // Example: New Delhi
 const longitude = 77.2090;
 const timezone = "Asia/Kolkata"; // Indian timezone
 
+// Example usage
+
+const dob = "1991-12-10"; // Example date of birth
+const result = calculateBioRhythms(date, dob, timezone,7);
+console.log("Bio Rhythms ", result);
 
 // Test Sunrise and Sunset
 const sunriseSunset = calculateSunriseSunset(date, latitude, longitude, timezone);

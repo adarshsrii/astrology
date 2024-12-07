@@ -1,4 +1,5 @@
 ### Node ###
+.idea/
 # Logs
 logs
 *.log
