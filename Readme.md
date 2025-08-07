@@ -72,8 +72,11 @@ console.log(biorhythms);
 
 ```javascript
 const { 
-    calculateSunriseSunset, 
-    calculateAbhijeetMuhurt, 
+    calculateSunriseSunset,
+    calculateMoonriseMoonset,
+    calculateMoonPosition,
+    calculateNakshatras,
+    calculateAbhijeetMuhurt,
     calculateChoghadiya 
 } = require("astrology-insights");
 ```
@@ -107,8 +110,32 @@ choghadiyas.day.forEach(({ type, start_time, end_time }) => {
     console.log(`${type}: ${start_time} - ${end_time}`);
 });
 
+
 choghadiyas.night.forEach(({ type, start_time, end_time }) => {
     console.log(`${type}: ${start_time} - ${end_time}`);
+});
+```
+
+### 4. **Calculate Moon Position**
+
+```javascript
+const { getMoonPosition, getMoonIllumination, getMoonTimes } = calculateMoonPosition(
+    date,
+    latitude,
+    longitude,
+    timezone
+);
+console.log(getMoonPosition);
+console.log(getMoonIllumination);
+console.log(getMoonTimes);
+```
+
+### 5. **Calculate Nakshatras**
+
+```javascript
+const nakshatras = calculateNakshatras(date, latitude, longitude, timezone);
+nakshatras.forEach(({ name, start, end, planet, deity, motivation }) => {
+  console.log(`${name}: ${start} - ${end} (${planet}, deity: ${deity}, motivation: ${motivation})`);
 });
 ```
 

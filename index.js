@@ -6,6 +6,8 @@ const calculateRahuKalam = require("./lib/rahuKalam");
 const calculateDurMuhurtam = require("./lib/durMuhurtam");
 const calculateYamghantKalam = require("./lib/yamghantKalam");
 const calculateBioRhythms = require("./lib/bioRhythms");
+const calculateMoonPosition = require("./lib/moonPosition");
+const calculateNakshatras = require("./lib/nakshatra");
 module.exports = {
     calculateSunriseSunset, // done
     calculateMoonriseMoonset, // done
@@ -14,6 +16,8 @@ module.exports = {
     calculateRahuKalam, //done
     calculateDurMuhurtam, //done
     calculateYamghantKalam, //done
-
     calculateBioRhythms,
+    calculateMoonPosition,
+    calculateNakshatras,
+    // Additional functions can be added here as needed
 };

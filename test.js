@@ -1,18 +1,20 @@
 const {
     calculateSunriseSunset,
     calculateMoonriseMoonset,
+    calculateMoonPosition,
     calculateAbhijeetMuhurt,
     calculateChoghadiya,
     calculateRahuKalam,
     calculateDurMuhurtam,
     calculateYamghantKalam,
-    calculateBioRhythms
+    calculateBioRhythms,
+    calculateNakshatras
 } = require("./index");
 
 // Sample data for testing
-const date = "2024-12-07";
-const latitude = 28.6139; // Example: New Delhi
-const longitude = 77.2090;
+const date = "2025-08-07";
+const latitude = 26.8467; // Example: New Delhi
+const longitude = 80.9462;
 const timezone = "Asia/Kolkata"; // Indian timezone
 
 // Example usage
@@ -32,6 +34,21 @@ console.log("Abhijeet Muhurt: ", abhijeet);
 // Test Moonrise and Moonset
 const moonriseMoonset = calculateMoonriseMoonset(date, latitude, longitude, timezone);
 console.log("Moonrise and Moonset: ", moonriseMoonset);
+
+// Test Moon Position
+const { getMoonPosition, getMoonIllumination, getMoonTimes } = calculateMoonPosition(
+    date,
+    latitude,
+    longitude,
+    timezone
+);
+console.log("Moon Position: ", getMoonPosition);
+console.log("Moon Illumination: ", getMoonIllumination);
+console.log("Moon Times: ", getMoonTimes);
+
+// Test Nakshatras
+const nakshatras = calculateNakshatras(date, latitude, longitude, timezone);
+console.log("Nakshatras: ", nakshatras);
 
 //Test Choghadiya
 const choghadiyas = calculateChoghadiya(date, sunriseSunset.sunrise, sunriseSunset.sunset, timezone);
