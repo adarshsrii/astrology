@@ -1,22 +1,48 @@
 ---
 
-# Astrology Insights for JavaScript 🌌
+## Astrology Insights for JavaScript 🌌
 
-A comprehensive toolkit for astrology calculations and utilities, built for JavaScript developers. This package provides functions for biorhythms, zodiac sign determination, compatibility checks, and other astrology-related computations. 
-**Astrology Insights** is a Node.js library designed to calculate important astrological and astronomical events, such as sunrise, sunset, Abhijit Muhurat, Choghadiya, and more. This library is perfect for those who want to integrate astrological insights into their applications.
+**Astrology Insights** is a Node.js library for computing astrological and astronomical events. It includes:
 
-## Features ✨
+- **Biorhythm Calculations** for physical, emotional, intellectual, and intuitive cycles
+- **Sunrise/Sunset** times for any date and location
+- **Abhijit Muhurat** (auspicious period of the day)
+- **Choghadiya** segments for day and night (Vedic astrology)
 
-- **Biorhythm Calculations**: Analyze physical, emotional, intellectual, and intuitive cycles.
+## Installation
 
-- **Sunrise and Sunset Calculator**  
-  Calculate accurate sunrise and sunset times for any given date, latitude, longitude, and timezone.
-  
-- **Abhijit Muhurat**  
-  Calculate the most auspicious Abhijit Muhurat during the day, based on the middle segment of the day.
+Install via npm:
+```bash
+npm install astrology-insights
+```
 
-- **Day and Night Choghadiya**  
-  Determine the start and end times of each Choghadiya (day and night) based on Vedic astrology principles.
+## Usage
+
+### Biorhythm Calculations
+```js
+const { calculateBioRhythms } = require('astrology-insights');
+
+const timezone = 'UTC';
+const dob = '1994-11-11';
+const today = '2024-12-06';
+const days = 30;
+
+const rhythms = calculateBioRhythms(today, dob, timezone, days);
+console.log(rhythms);
+```
+
+### Sunrise and Sunset
+```js
+const { calculateSunriseSunset } = require('astrology-insights');
+
+const date = '2024-11-24';
+const lat = 28.6139;
+const lon = 77.2090;
+const tz = 'Asia/Kolkata';
+
+const { sunrise, sunset } = calculateSunriseSunset(date, lat, lon, tz);
+console.log(`Sunrise: ${sunrise}, Sunset: ${sunset}`);
+```
 
 ---
 
@@ -176,39 +202,17 @@ Char: 02:25:39 - 03:55:50
 Rog: 03:55:50 - 05:26:01
 ```
 
-## License 📜
+## Contributing
 
-This project is licensed under the MIT License.
+Contributions are welcome! Please fork this repository and submit a pull request.
 
-## Contribute 🤝
+## License
 
-Feel free to contribute to the project! Open an issue or submit a pull request to improve the functionality.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
----
+## Acknowledgments
 
-## Contributions 🤝
-
-We welcome contributions! Feel free to submit issues or pull requests to improve this toolkit. To get started:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m "Add a new feature"`.
-4. Push to the branch: `git push origin feature-name`.
-5. Open a pull request.
-
----
-
-## License 📜
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## Acknowledgments 🙌
-
-- **Luxon** for date-time calculations.
-- Inspired by the works of **Wilhelm Fliess** for biorhythm theory.
-
-For any questions or feature requests, feel free to [open an issue](https://github.com/your-repo/issues) or contact me at adarsh@synchsoft.com.
+- **Luxon** for date-time utilities
+- Inspired by Wilhelm Fliess’s work on biorhythm theory
 
 Happy coding and stargazing! 🌠
