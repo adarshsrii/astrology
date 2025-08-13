@@ -177,7 +177,7 @@ export class Planetary {
     calculateOrbit(planet: string, date: Date): { perihelion: number; aphelion: number; eccentricity: number } {
         const orbital_params = this.orbital_data[planet];
         
-        if (!orbitalParams) {
+        if (!orbital_params) {
             // Return default values for unknown planets
             return {
                 perihelion: 1.0,

@@ -55,7 +55,7 @@ export class Ephemeris {
                 } catch {
                     return false;
                 }
-            }) || possiblePaths[0];
+            }) || possible_paths[0];
         } else {
             this.ephemeris_path = ephemeris_path;
         }
@@ -103,7 +103,7 @@ export class Ephemeris {
                 return this.get_fallback_position(body, date);
         } catch (error) {
             console.warn(`Swiss Ephemeris calculation failed for ${body}, using fallback`);
-            return this.getFallbackPosition(body, date);
+            return this.get_fallback_position(body, date);
         }
     }
 
@@ -562,7 +562,7 @@ export class Ephemeris {
         };
 
         const body_data = positions[body] || positions['Sun'];
-        const longitude = normalizeAngle(bodyData.lon + bodyData.motion * daysSinceEpoch);
+        const longitude = normalizeAngle(body_data.lon + body_data.motion * daysSinceEpoch);
         
         return { longitude, latitude: 0 };
     }
@@ -597,7 +597,7 @@ export class Ephemeris {
             } catch (error) {
                 console.warn(`Could not calculate position for ${planet}:`, error);
                 // Add with fallback panchang
-                const fallbackPos = this.getFallbackPosition(planet, date);
+                const fallbackPos = this.get_fallback_position(planet, date);
                 const siderealLongitude = normalizeAngle(fallbackPos.longitude - ayanamsa);
                 
                 positions.push({
