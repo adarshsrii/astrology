@@ -8,6 +8,36 @@ import { Planetary, TithiInfo } from '../calculations/planetary';
 import { Location } from '../types/panchang';
 import { normalizeAngle } from '../utils/index';
 
+/**
+ * Convert a Date to a Date object representing the same wall-clock time in the given timezone.
+ * The returned Date's UTC fields correspond to the original date's local fields in the specified timezone.
+ */
+function toTimeZone(date: Date, timeZone: string): Date {
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const parts = fmt.formatToParts(date);
+  let y = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0;
+  for (const p of parts) {
+    switch (p.type) {
+      case 'year': y = +p.value; break;
+      case 'month': mo = +p.value - 1; break;
+      case 'day': d = +p.value; break;
+      case 'hour': h = +p.value; break;
+      case 'minute': mi = +p.value; break;
+      case 'second': s = +p.value; break;
+    }
+  }
+  return new Date(Date.UTC(y, mo, d, h, mi, s));
+}
+
 export interface PanchangData {
     date: Date;
     location?: { latitude: number; longitude: number; timezone: string; name?: string };
@@ -144,7 +174,7 @@ export class Panchang {
         const karana = this.planetary.calculateKarana(sunPosition.longitude, moonPosition.longitude);
         const vara = this.getVara(inputDate); // Use exact input date for vara calculation
 
-        // Calculate transition times for each element
+        // Calculate transition times for each element (UTC)
         const tithiEndTime = this.calculateTithiEndTime(inputDate, location);
         const nakshatraEndTime = this.calculateNakshatraEndTime(inputDate, location);
         const yogaEndTime = this.calculateYogaEndTime(inputDate, location);
@@ -161,23 +191,27 @@ export class Panchang {
         const moonriseTime = this.ephemeris.calculateMoonrise(inputDate, location);
         const moonsetTime = this.ephemeris.calculateMoonset(inputDate, location);
 
+        // Adjust all returned times to the requested timezone
+        const tz = location.timezone;
+        const adjust = (dt: Date | null | undefined): Date | null => dt ? toTimeZone(dt, tz) : null;
+
         return {
-            date: inputDate, // Return the EXACT input date - no conversions or modifications
+            date: toTimeZone(inputDate, tz), // Convert input date to specified timezone
             location: {
                 latitude: location.latitude,
                 longitude: location.longitude,
                 timezone: location.timezone || 'UTC',
                 name: location.name
             },
-            tithi: { ...tithi, endTime: tithiEndTime },
-            nakshatra: { ...nakshatra, endTime: nakshatraEndTime },
-            yoga: { ...yoga, endTime: yogaEndTime },
-            karana: { ...karana, endTime: karanaEndTime },
+            tithi: { ...tithi, endTime: adjust(tithiEndTime) },
+            nakshatra: { ...nakshatra, endTime: adjust(nakshatraEndTime) },
+            yoga: { ...yoga, endTime: adjust(yogaEndTime) },
+            karana: { ...karana, endTime: adjust(karanaEndTime) },
             vara,
-            sunrise: sunriseTime,
-            sunset: sunsetTime,
-            moonrise: moonriseTime,
-            moonset: moonsetTime,
+            sunrise: adjust(sunriseTime),
+            sunset: adjust(sunsetTime),
+            moonrise: adjust(moonriseTime),
+            moonset: adjust(moonsetTime),
             moonPhase,
             lunarMonth: this.calculateLunarMonth(sunPosition.longitude, moonPosition.longitude),
             paksha: this.calculatePaksha(moonPosition.longitude, sunPosition.longitude),
@@ -188,11 +222,32 @@ export class Panchang {
             nakshatraPada: this.calculateNakshatraPada(date, location),
             ritu: this.calculateRitu(sunPosition.longitude),
             ayana: this.calculateAyana(sunPosition.longitude),
-            madhyahna: this.calculateMadhyahna(sunriseTime, sunsetTime),
+            madhyahna: adjust(this.calculateMadhyahna(sunriseTime, sunsetTime)),
             dinamana: this.calculateDinamana(sunriseTime, sunsetTime),
             ratrimana: this.calculateRatrimana(sunriseTime, sunsetTime),
-            muhurat: this.calculateMuhurat(date, location, sunriseTime, sunsetTime),
-            kalam: this.calculateKalam(date, location, sunriseTime, sunsetTime),
+            muhurat: (() => {
+                const m = this.calculateMuhurat(date, location, sunriseTime, sunsetTime);
+                return {
+                    abhijita: { start: adjust(m.abhijita?.start), end: adjust(m.abhijita?.end) },
+                    amritKalam: m.amritKalam?.map(p => ({ start: adjust(p.start), end: adjust(p.end) })) || [],
+                    sarvarthaSiddhiYoga: m.sarvarthaSiddhiYoga,
+                    amritSiddhiYoga: { start: adjust(m.amritSiddhiYoga?.start), end: adjust(m.amritSiddhiYoga?.end) },
+                    vijaya: { start: adjust(m.vijaya?.start), end: adjust(m.vijaya?.end) },
+                    godhuli: { start: adjust(m.godhuli?.start), end: adjust(m.godhuli?.end) },
+                    sayahnaSandhya: { start: adjust(m.sayahnaSandhya?.start), end: adjust(m.sayahnaSandhya?.end) },
+                    nishita: { start: adjust(m.nishita?.start), end: adjust(m.nishita?.end) },
+                    brahma: { start: adjust(m.brahma?.start), end: adjust(m.brahma?.end) },
+                    pratahSandhya: { start: adjust(m.pratahSandhya?.start), end: adjust(m.pratahSandhya?.end) }
+                };
+            })(),
+            kalam: (() => {
+                const k = this.calculateKalam(date, location, sunriseTime, sunsetTime);
+                return {
+                    rahu: { start: adjust(k.rahu?.start), end: adjust(k.rahu?.end) },
+                    gulikai: { start: adjust(k.gulikai?.start), end: adjust(k.gulikai?.end) },
+                    yamaganda: { start: adjust(k.yamaganda?.start), end: adjust(k.yamaganda?.end) }
+                };
+            })(),
         };
     }
 

@@ -510,141 +510,16 @@ export class PanchangCalculator {
     }
 }
 
-// Convenience functions for quick use
-/**
- * Quick function to calculate Panchang
- * @param date Date for calculation - must be the EXACT date/time for calculation
- * @param latitude Latitude in degrees
- * @param longitude Longitude in degrees  
- * @param timezone Timezone identifier
- * @returns Panchang panchang
- */
-export function getPanchang(
-    date: Date,
-    latitude: number,
-    longitude: number,
-    timezone: string
-): PanchangOutput {
-    const calculator = new PanchangCalculator();
-    
-    try {
-        // CRITICAL: Pass the exact date without any modifications
-        return calculator.calculatePanchang({
-            date: date, // Use the exact input date
-            location: { latitude, longitude, timezone }
-        });
-    } finally {
-        calculator.cleanup();
-    }
-}
-
-/**
- * Quick function to get a formatted Panchang report
- * @param date Date for calculation - must be the EXACT date/time for calculation
- * @param latitude Latitude in degrees
- * @param longitude Longitude in degrees
- * @param timezone Timezone identifier
- * @param locationName Optional location name for display
- * @param useLocalTimezone Whether to display times in local timezone (default: false, uses UTC)
- * @returns Formatted text report
- */
-export function getPanchangReport(
-    date: Date, 
-    latitude: number, 
-    longitude: number, 
-    timezone: string, 
-    locationName?: string, 
-    useLocalTimezone: boolean = false
-): string {
-    const calculator = new PanchangCalculator();
-    
-    try {
-        // CRITICAL: Pass the exact date without any modifications
-        return calculator.generatePanchangReport({
-            date: date, // Use the exact input date
-            location: { latitude, longitude, timezone, name: locationName }
-        }, useLocalTimezone);
-    } finally {
-        calculator.cleanup();
-    }
-}
-
-/**
- * Quick function to get all ayanamsa systems with their degrees for a given date
- * @param date Date for ayanamsa calculation (defaults to current date)
- * @returns Array of ayanamsa information including name, ID, degree, and description
- */
-export function getAyanamsa(date: Date = new Date()) {
-    const ephemeris = new Ephemeris();
-    
-    try {
-        return ephemeris.getAyanamsa(date);
-    } finally {
-        ephemeris.cleanup();
-    }
-}
-
-/**
- * Quick function to get a specific ayanamsa value by name or ID
- * @param ayanamsaId Ayanamsa ID (number) or name (string)
- * @param date Date for calculation (defaults to current date)
- * @returns Ayanamsa information or null if not found
- */
-export function getSpecificAyanamsa(ayanamsaId: number | string, date: Date = new Date()) {
-    const ephemeris = new Ephemeris();
-    
-    try {
-        return ephemeris.getSpecificAyanamsa(date, ayanamsaId);
-    } finally {
-        ephemeris.cleanup();
-    }
-}
-
-/**
- * Get current planetary positions with Nakshatra and Rashi information
- * @param date Date for calculation (defaults to current date)
- * @param ayanamsaId Ayanamsa system to use (defaults to 1 - Lahiri)
- * @returns Array of planetary positions with astrological information
- */
-export function getCurrentPlanets(date: Date = new Date(), ayanamsaId: number = 1) {
-    const ephemeris = new Ephemeris();
-    
-    try {
-        return ephemeris.getCurrentPlanets(date, ayanamsaId);
-    } finally {
-        ephemeris.cleanup();
-    }
-}
-
 // Default export
 export default PanchangCalculator;
 
-/**
- * Convenience function - alias for getPanchang
- * Calculate comprehensive Panchang panchang for a given date, location, and timezone
- * @param date Date for calculation
- * @param location Location object with latitude and longitude, or individual parameters
- * @param timezone Target timezone (defaults to 'UTC')
- * @returns Complete Panchang output with timezone-aware formatting
- */
-export function calculatePanchang(
-    date: Date,
-    location: Location | number,
-    longitudeOrTimezone?: number | string,
-    timezone?: string,
-    locationName?: string,
-    lang: 'en' | 'hi' = 'en'
-): PanchangOutput {
-    if (typeof location === 'number') {
-        const latitude = location;
-        const longitude = longitudeOrTimezone as number;
-        const tz = timezone || 'UTC';
-        return getPanchang(date, latitude, longitude, tz);
-    } else {
-        const tz = (longitudeOrTimezone as string) || timezone || 'UTC';
-        return getPanchang(date, location.latitude, location.longitude, tz);
-    }
-}
+// Extracted utility functions
+export { getPanchang } from './functions/getPanchang';
+export { getPanchangReport } from './functions/getPanchangReport';
+export { getAyanamsa } from './functions/getAyanamsa';
+export { getSpecificAyanamsa } from './functions/getSpecificAyanamsa';
+export { getCurrentPlanets } from './functions/getCurrentPlanets';
+export { calculatePanchang } from './functions/calculatePanchang';
 
 // Re-export utility functions for convenience
 export {
