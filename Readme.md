@@ -202,6 +202,14 @@ Char: 02:25:39 - 03:55:50
 Rog: 03:55:50 - 05:26:01
 ```
 
+## Testing
+
+You can run the test suite to view sample outputs for all features (including Panchang calculations):
+
+```bash
+npm run test
+```
+
 ## Contributing
 
 Contributions are welcome! Please fork this repository and submit a pull request.
@@ -213,6 +221,11 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 ## Acknowledgments
 
 - **Luxon** for date-time utilities
+- **SunCalc** for astronomical calculations
+- **Swisseph** for astronomical calculations
+- **Vedic astrology principles** for Choghadiya and Muhurat calculations
+- **Biorhythm theory** for health and wellness insights
+- **Open-source community** for continuous improvements and contributions
 - Inspired by Wilhelm Fliess’s work on biorhythm theory
 
 Happy coding and stargazing! 🌠

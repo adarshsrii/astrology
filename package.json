@@ -1,7 +1,7 @@
 {
   "name": "astrology-insights",
-  "version": "1.1.2",
-  "description": "Astrology Insights for Applications.",
+  "version": "1.1.3",
+  "description": "Shree Ganesh - Astrology Insights for Applications.",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
@@ -14,8 +14,20 @@
     "astrology",
     "astrology",
     "2024",
+    "2025",
     "insights",
-    "astro"
+    "astro",
+    "horoscope",
+    "zodiac",
+    "horoscopes",
+    "zodiac-signs",
+    "zodiac-sign",
+    "zodiac-signs-2024",
+    "zodiac-signs-2025",
+    "zodiac-signs-insights",
+    "zodiac-signs-2024-insights",
+    "numerology",
+    "numerology-insights"
   ],
   "author": "Adarsh Srivastava",
   "license": "MIT",
