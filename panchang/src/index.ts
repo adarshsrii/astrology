@@ -529,3 +529,12 @@ export {
     getFormattedDateInfo,
     FormattedDateInfo
 } from './utils/index';
+
+// Panchang v2 exports
+export { calculateFullPanchang } from './panchang-v2';
+export type { PanchangResult, PanchangEntry, NakshatraEntry, RashiInfo } from './types';
+export { calculateTithi } from './core/tithi';
+export { calculateNakshatra } from './core/nakshatra';
+export { calculateYoga } from './core/yoga';
+export { calculateKarana } from './core/karana';
+export { calculateRashi } from './core/rashi';

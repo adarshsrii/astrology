@@ -202,12 +202,166 @@ Char: 02:25:39 - 03:55:50
 Rog: 03:55:50 - 05:26:01
 ```
 
+## v2 — Full Panchang (Swiss Ephemeris)
+
+**New in v2.0.0** — Comprehensive Vedic Panchang with Swiss Ephemeris precision, validated against Drik Panchang.
+
+### Full Panchang
+
+```javascript
+const { calculateFullPanchang } = require("astrology-insights");
+
+const result = calculateFullPanchang("2026-03-20", 28.6139, 77.209, "Asia/Kolkata");
+console.log(result.tithi[0].name);      // "Shukla Dwitiya"
+console.log(result.nakshatra[0].name);   // "Revati"
+console.log(result.nakshatra[0].pada);   // 1
+console.log(result.yoga[0].name);        // "Brahma"
+console.log(result.karana[0].name);      // "Balava"
+console.log(result.moonSign.name);       // "Pisces"
+console.log(result.sunSign.name);        // "Pisces"
+console.log(result.paksha);             // "Shukla"
+console.log(result.sunrise);            // "06:26"
+console.log(result.sunset);             // "18:33"
+```
+
+**Returns a `PanchangResult` object with:**
+- **Tithi** — lunar day with name, number (1-15), paksha, and progress %
+- **Nakshatra** — lunar mansion with pada (1-4), lord, deity, and progress %
+- **Yoga** — auspicious conjunction with name, number (1-27), and progress %
+- **Karana** — half-tithi with name, number, and progress %
+- **Vara** — weekday
+- **Moon/Sun Sign** — zodiac sign with lord and degree
+- **Moon Phase** — name and illumination %
+- **Sunrise/Sunset/Moonrise/Moonset** — precise times for location
+
+### Individual Core Modules
+
+For direct calculation from raw sidereal longitudes:
+
+```javascript
+const {
+  calculateTithi,
+  calculateNakshatraV2,
+  calculateYoga,
+  calculateKarana,
+  calculateRashi,
+} = require("astrology-insights");
+
+// Tithi from Sun and Moon sidereal longitudes
+const tithi = calculateTithi(335.5, 359.8);
+console.log(tithi.name);    // "Shukla Tritiya"
+console.log(tithi.paksha);  // "Shukla"
+console.log(tithi.progress); // 2.5
+
+// Nakshatra from Moon longitude
+const nakshatra = calculateNakshatraV2(355.0);
+console.log(nakshatra.name); // "Revati"
+console.log(nakshatra.pada); // 3
+console.log(nakshatra.lord); // "Mercury"
+
+// Yoga from Sun + Moon
+const yoga = calculateYoga(335.5, 359.8);
+console.log(yoga.name); // "Indra"
+
+// Karana from Sun-Moon difference
+const karana = calculateKarana(335.5, 359.8);
+console.log(karana.name); // "Kaulava"
+
+// Rashi (zodiac sign) from any longitude
+const rashi = calculateRashi(355.0);
+console.log(rashi.name); // "Pisces"
+console.log(rashi.lord); // "Jupiter"
+```
+
+### Validation
+
+Tested against Drik Panchang for multiple dates including:
+- March 20, 2026 (Delhi) — all elements match
+- October 20, 2025 (Diwali) — Chaturdashi, Hasta, Shakuni confirmed
+- January 14, 2026 (Makar Sankranti) — Ekadashi, Anuradha confirmed
+- August 15, 1947 (Independence Day) — historical accuracy verified
+
+Sunrise/sunset accuracy: ±1-2 minutes vs Drik Panchang reference.
+
+### React Native
+
+On React Native, `calculateFullPanchang` uses a **local fallback** (Jean Meeus + SunCalc) that gives correct Tithi/Nakshatra/Yoga/Karana names and signs. For Swiss Ephemeris precision (exact transition times, sub-degree accuracy), use `fetchPanchang()` to call your API:
+
+```javascript
+const { fetchPanchang } = require("astrology-insights");
+
+// Local fallback (works offline, ~1° accuracy — correct names/signs)
+// Swiss Ephemeris is not available on React Native, but the Jean Meeus
+// fallback produces results validated against Drik Panchang.
+
+// For Swiss Ephemeris precision, call your deployed API:
+const panchang = await fetchPanchang(
+  "2026-03-20", 28.6139, 77.209, "Asia/Kolkata",
+  "https://your-app.vercel.app/api/panchang"
+);
+```
+
+### Deploying the Panchang API (Vercel)
+
+The package includes a ready-to-deploy Vercel Serverless Function at `api/panchang.js`. It wraps `calculateFullPanchang()` with Swiss Ephemeris for maximum precision.
+
+**Step 1: Deploy to Vercel**
+```bash
+cd astrology-insights
+npx vercel
+```
+Or connect your GitHub repo to Vercel — it auto-detects the `api/` directory.
+
+**Step 2: Test the endpoint**
+```bash
+curl "https://your-app.vercel.app/api/panchang?date=2026-03-20&lat=28.6139&lon=77.209&tz=Asia/Kolkata"
+```
+
+**API Parameters:**
+
+| Param | Type | Required | Example |
+|-------|------|----------|---------|
+| `date` | string | Yes | `2026-03-20` |
+| `lat` | number | Yes | `28.6139` |
+| `lon` | number | Yes | `77.209` |
+| `tz` | string | Yes | `Asia/Kolkata` |
+
+**Response:** Full `PanchangResult` JSON (same shape as `calculateFullPanchang()`).
+
+**Caching:** Responses are cached for 1 hour (`s-maxage=3600`) with stale-while-revalidate for 24 hours. Same date+location returns cached result instantly.
+
+**Step 3: Use in React Native**
+```javascript
+const { fetchPanchang } = require("astrology-insights");
+const PANCHANG_API = "https://your-app.vercel.app/api/panchang";
+
+const result = await fetchPanchang("2026-03-20", 28.6139, 77.209, "Asia/Kolkata", PANCHANG_API);
+console.log(result.tithi[0].name); // "Shukla Dwitiya"
+```
+
+**Architecture:**
+```
+┌──────────────────────────┐     ┌──────────────────────────┐
+│   React Native App       │     │  Vercel Serverless       │
+│                          │     │                          │
+│  Local fallback (fast)   │────▶│  Swiss Ephemeris (precise)│
+│  Jean Meeus + SunCalc    │     │  calculateFullPanchang() │
+│  ~1° accuracy            │     │  ~0.001° accuracy        │
+│  Works offline           │     │  Transition times        │
+└──────────────────────────┘     └──────────────────────────┘
+```
+
+**When to use which:**
+- **Local fallback**: Choghadiya display, current period detection, basic Panchang
+- **Server API**: Precise transition end times, progress %, detailed daily Panchang view
+
 ## Testing
 
-You can run the test suite to view sample outputs for all features (including Panchang calculations):
+Run the test suite to view sample outputs for all features:
 
 ```bash
-npm run test
+npm run test        # Legacy test (node test.js)
+npm run test:unit   # Jest unit tests (34 tests)
 ```
 
 ## Contributing

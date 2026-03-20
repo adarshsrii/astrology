@@ -2,6 +2,14 @@ require('ts-node').register({ transpileOnly: true });
 
 // Core Panchang engine (TypeScript entry)
 const { getPanchang } = require('./panchang/src/index.ts');
+const { calculateFullPanchang } = require('./panchang/src/panchang-v2');
+
+// v2 Core calculation modules (pure functions)
+const { calculateTithi } = require('./panchang/src/core/tithi');
+const { calculateNakshatra: calculateNakshatraV2 } = require('./panchang/src/core/nakshatra');
+const { calculateYoga } = require('./panchang/src/core/yoga');
+const { calculateKarana } = require('./panchang/src/core/karana');
+const { calculateRashi } = require('./panchang/src/core/rashi');
 
 // Legacy utility modules
 const calculateSunriseSunset = require('./lib/sunriseSunset');
@@ -55,5 +63,11 @@ module.exports = {
   calculateBioRhythms,
   calculateMoonPosition,
   calculateNakshatras,
-  calculatePanchang
+  calculatePanchang,
+  calculateFullPanchang,
+  calculateTithi,
+  calculateNakshatraV2,
+  calculateYoga,
+  calculateKarana,
+  calculateRashi,
 };
