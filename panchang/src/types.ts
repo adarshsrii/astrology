@@ -30,6 +30,13 @@ export interface VaraInfo {
   number: number;
 }
 
+export interface TimingEntry {
+  name: string;
+  startTime: string;
+  endTime: string;
+  description?: string;
+}
+
 export interface PanchangResult {
   date: string;
   location: { lat: number; lon: number; timezone: string; name?: string };
@@ -46,6 +53,8 @@ export interface PanchangResult {
   sunSign: RashiInfo;
   moonPhase: { name: string; illumination: number };
   paksha: 'Shukla' | 'Krishna';
+  auspiciousMuhurats: TimingEntry[];
+  inauspiciousKalams: TimingEntry[];
 }
 
 export interface CelestialPosition {
@@ -58,4 +67,42 @@ export interface Location {
   longitude: number;
   timezone: string;
   name?: string;
+}
+
+export interface DailySummary {
+  date: string;           // "2026-03-01"
+  weekday: string;        // "Sunday"
+  sunrise: string;        // "6:10 AM"
+  sunset: string;         // "6:17 PM"
+  tithi: {
+    name: string;         // "Shukla Trayodashi"
+    paksha: 'Shukla' | 'Krishna';
+    progress: number;
+  };
+  nakshatra: {
+    name: string;         // "Pushya"
+    pada: number;
+    lord: string;
+  };
+  yoga: {
+    name: string;
+  };
+  karana: {
+    name: string;
+  };
+  moonSign: string;       // "Cancer"
+  sunSign: string;        // "Pisces"
+  moonPhase: string;      // "Waxing Gibbous"
+  moonIllumination: number; // 0-100
+  specialDays: string[];  // ["Pradosh", "Ekadashi"]
+  isPurnima: boolean;
+  isAmavasya: boolean;
+  isEkadashi: boolean;
+}
+
+export interface MonthlyPanchangResult {
+  year: number;
+  month: number;
+  location: { lat: number; lon: number; timezone: string };
+  days: DailySummary[];
 }

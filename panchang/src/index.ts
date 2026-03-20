@@ -532,7 +532,8 @@ export {
 
 // Panchang v2 exports
 export { calculateFullPanchang } from './panchang-v2';
-export type { PanchangResult, PanchangEntry, NakshatraEntry, RashiInfo } from './types';
+export { calculateMonthlyPanchang } from './monthly';
+export type { PanchangResult, PanchangEntry, NakshatraEntry, RashiInfo, MonthlyPanchangResult, DailySummary } from './types';
 export { calculateTithi } from './core/tithi';
 export { calculateNakshatra } from './core/nakshatra';
 export { calculateYoga } from './core/yoga';

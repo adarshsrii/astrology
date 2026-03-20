@@ -3,6 +3,7 @@ require('ts-node').register({ transpileOnly: true });
 // Core Panchang engine (TypeScript entry)
 const { getPanchang } = require('./panchang/src/index.ts');
 const { calculateFullPanchang } = require('./panchang/src/panchang-v2');
+const { calculateMonthlyPanchang } = require('./panchang/src/monthly');
 
 // v2 Core calculation modules (pure functions)
 const { calculateTithi } = require('./panchang/src/core/tithi');
@@ -65,6 +66,7 @@ module.exports = {
   calculateNakshatras,
   calculatePanchang,
   calculateFullPanchang,
+  calculateMonthlyPanchang,
   calculateTithi,
   calculateNakshatraV2,
   calculateYoga,

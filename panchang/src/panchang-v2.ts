@@ -5,14 +5,29 @@ import { calculateKarana } from './core/karana';
 import { calculateRashi } from './core/rashi';
 import { normalizeAngle } from './core/constants';
 import { PanchangResult, Location } from './types';
+import { calculateMuhurats } from './timings/muhurat';
+import { calculateKalams } from './timings/kalam';
 
 const MOON_PHASES = [
   'New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous',
   'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent',
 ];
 
-function getMoonPhaseName(diff: number): string {
-  return MOON_PHASES[Math.floor(diff / 45)] || 'New Moon';
+function getMoonPhaseName(tithiIndex: number): string {
+  // Derive phase from tithi number (more accurate than angular division)
+  // Tithi 0 = Shukla Pratipad (just after new moon)
+  // Tithi 14 = Purnima (full moon)
+  // Tithi 15 = Krishna Pratipad (just after full moon)
+  // Tithi 29 = Amavasya (new moon)
+  if (tithiIndex <= 0) return 'New Moon';
+  if (tithiIndex <= 3) return 'Waxing Crescent';
+  if (tithiIndex <= 6) return 'First Quarter';
+  if (tithiIndex <= 10) return 'Waxing Gibbous';
+  if (tithiIndex <= 14) return 'Full Moon';
+  if (tithiIndex <= 18) return 'Waning Gibbous';
+  if (tithiIndex <= 21) return 'Last Quarter';
+  if (tithiIndex <= 25) return 'Waning Crescent';
+  return 'New Moon';
 }
 
 function formatTimeHHMM(date: Date | null, timezone: string): string {
@@ -26,7 +41,11 @@ export function calculateFullPanchang(
   longitude: number,
   timezone: string,
 ): PanchangResult {
-  const inputDate = typeof date === 'string' ? new Date(date + 'T06:00:00') : date;
+  // If date string passed, use current time today (not fixed 6 AM)
+  // This ensures illumination and progress values are real-time
+  const inputDate = typeof date === 'string'
+    ? (date === new Date().toISOString().split('T')[0] ? new Date() : new Date(date + 'T12:00:00'))
+    : date;
   const location: Location = { latitude, longitude, timezone };
 
   // Try to use Swiss Ephemeris, fall back to SunCalc-based calculations
@@ -115,19 +134,49 @@ export function calculateFullPanchang(
   const moonSign = calculateRashi(moonLon);
   const sunSign = calculateRashi(sunLon);
 
+  // Use the date string to determine weekday (timezone-independent)
+  const varaDateStr = typeof date === 'string' ? date : inputDate.toISOString().split('T')[0];
+  const varaDate = new Date(varaDateStr + 'T12:00:00Z'); // Noon UTC — safe for any timezone
   const vara = {
-    name: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][inputDate.getDay()],
-    number: inputDate.getDay(),
+    name: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDate.getUTCDay()],
+    number: varaDate.getUTCDay(),
   };
 
   const diff = normalizeAngle(moonLon - sunLon);
-  const moonIllumination = Math.round(((1 - Math.cos(diff * Math.PI / 180)) / 2) * 100);
+  // Use SunCalc for accurate illumination when available
+  let moonIllumination = Math.round(((1 - Math.cos(diff * Math.PI / 180)) / 2) * 100);
+  try {
+    const SunCalc = require('suncalc');
+    const illum = SunCalc.getMoonIllumination(inputDate);
+    moonIllumination = Math.round(illum.fraction * 100);
+  } catch {};
+
+  const sunriseStr = formatTimeHHMM(sunrise, timezone);
+  const sunsetStr = formatTimeHHMM(sunset, timezone);
+  const dateStr = inputDate.toISOString().split('T')[0];
+
+  // Calculate auspicious muhurats and inauspicious kalams
+  let auspiciousMuhurats: { name: string; startTime: string; endTime: string; description?: string }[] = [];
+  let inauspiciousKalams: { name: string; startTime: string; endTime: string; description?: string }[] = [];
+
+  if (sunriseStr && sunsetStr) {
+    try {
+      auspiciousMuhurats = calculateMuhurats(sunriseStr, sunsetStr, dateStr, latitude, longitude, timezone);
+    } catch {
+      // Timing calculation failed; return empty array
+    }
+    try {
+      inauspiciousKalams = calculateKalams(sunriseStr, sunsetStr, dateStr, latitude, longitude, timezone);
+    } catch {
+      // Timing calculation failed; return empty array
+    }
+  }
 
   return {
-    date: inputDate.toISOString().split('T')[0],
+    date: dateStr,
     location: { lat: latitude, lon: longitude, timezone },
-    sunrise: formatTimeHHMM(sunrise, timezone),
-    sunset: formatTimeHHMM(sunset, timezone),
+    sunrise: sunriseStr,
+    sunset: sunsetStr,
     moonrise: formatTimeHHMM(moonrise, timezone),
     moonset: formatTimeHHMM(moonset, timezone),
     tithi: [{ name: tithi.name, number: tithi.number, startTime: '', endTime: '', progress: tithi.progress }],
@@ -137,7 +186,9 @@ export function calculateFullPanchang(
     vara,
     moonSign,
     sunSign,
-    moonPhase: { name: getMoonPhaseName(diff), illumination: moonIllumination },
+    moonPhase: { name: getMoonPhaseName(tithi.tithiIndex - 1), illumination: moonIllumination },
     paksha: tithi.paksha,
+    auspiciousMuhurats,
+    inauspiciousKalams,
   };
 }

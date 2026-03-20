@@ -126,6 +126,20 @@ console.log('  Moon Phase:', fullPanchang.moonPhase.name, fullPanchang.moonPhase
 console.log('  Sunrise:', fullPanchang.sunrise, '| Sunset:', fullPanchang.sunset);
 console.log('  Moonrise:', fullPanchang.moonrise, '| Moonset:', fullPanchang.moonset);
 
+// Phase 2: Timings
+if (fullPanchang.auspiciousMuhurats && fullPanchang.auspiciousMuhurats.length > 0) {
+  console.log('\n  ── Auspicious Muhurats ──');
+  fullPanchang.auspiciousMuhurats.forEach(m => {
+    console.log(`    ${m.name}: ${m.startTime} - ${m.endTime}`);
+  });
+}
+if (fullPanchang.inauspiciousKalams && fullPanchang.inauspiciousKalams.length > 0) {
+  console.log('\n  ── Inauspicious Kalams ──');
+  fullPanchang.inauspiciousKalams.forEach(k => {
+    console.log(`    ${k.name}: ${k.startTime} - ${k.endTime}`);
+  });
+}
+
 // Individual core module tests
 console.log('\n═══ v2 Core Modules ═══\n');
 
