@@ -1,7 +1,8 @@
 // React Native compatible entry point
-// Skips ts-node and panchang engine (requires swisseph native module)
-// Exports pure JS utility modules + API fetch for full panchang
+// Uses compiled JS from dist/ — no ts-node, no raw swisseph
+// swisseph calls are handled by react-native-swisseph via the bridge stub
 
+// Legacy utility modules (pure JS, work offline)
 const calculateSunriseSunset = require('./lib/sunriseSunset');
 const calculateMoonriseMoonset = require('./lib/moonriseMoonset');
 const calculateAbhijeetMuhurt = require('./lib/abhijeetMuhurt');
@@ -12,42 +13,43 @@ const calculateYamghantKalam = require('./lib/yamghantKalam');
 const calculateBioRhythms = require('./lib/bioRhythms');
 const calculateMoonPosition = require('./lib/moonPosition');
 const calculateNakshatras = require('./lib/nakshatra');
+const calculateGulikaKalam = require('./lib/gulikaKalam');
 
-/**
- * Fetch full Panchang from Supabase Edge Function (requires internet).
- * This is the React Native equivalent of calculateFullPanchang().
- * Configure PANCHANG_API_URL before using.
- *
- * @param {string} date - "YYYY-MM-DD"
- * @param {number} latitude
- * @param {number} longitude
- * @param {string} timezone - IANA timezone
- * @param {string} [apiUrl] - Override API endpoint
- * @returns {Promise<object>} PanchangResult
- */
-async function fetchPanchang(date, latitude, longitude, timezone, apiUrl) {
-  const url = apiUrl || process.env.PANCHANG_API_URL;
-  if (!url) {
-    throw new Error(
-      'fetchPanchang requires a Supabase API URL. ' +
-      'Set PANCHANG_API_URL env var or pass apiUrl parameter. ' +
-      'For server-side use, import calculateFullPanchang from the main entry instead.'
-    );
-  }
+// v2 Panchang (compiled JS, uses SunCalc + Jean Meeus fallback)
+const { calculateFullPanchang } = require('./dist/panchang/src/panchang-v2');
+const { calculateMonthlyPanchang } = require('./dist/panchang/src/monthly');
 
-  const response = await fetch(
-    `${url}?date=${date}&lat=${latitude}&lon=${longitude}&tz=${encodeURIComponent(timezone)}`
-  );
+// v2 Core modules (pure math, no external deps)
+const { calculateTithi } = require('./dist/panchang/src/core/tithi');
+const { calculateNakshatra: calculateNakshatraV2 } = require('./dist/panchang/src/core/nakshatra');
+const { calculateYoga } = require('./dist/panchang/src/core/yoga');
+const { calculateKarana } = require('./dist/panchang/src/core/karana');
+const { calculateRashi } = require('./dist/panchang/src/core/rashi');
 
-  if (!response.ok) {
-    throw new Error(`Panchang API error: ${response.status}`);
-  }
+// Birth Chart (compiled JS, swisseph via react-native-swisseph bridge)
+const { calculateBirthChart } = require('./dist/panchang/src/birthchart/birthchart');
 
-  return response.json();
-}
+// Birth Chart Analysis
+const { calculateTattvaBalance } = require('./dist/panchang/src/birthchart/analysis/tattva');
+const { calculateFriendships } = require('./dist/panchang/src/birthchart/analysis/friendships');
+const { calculateAspects } = require('./dist/panchang/src/birthchart/analysis/aspects');
+const { calculateShadBala } = require('./dist/panchang/src/birthchart/analysis/shadbala');
+const { analyzeManglik, analyzeKaalSarp, analyzeGandaMoola, analyzeGandanta } = require('./dist/panchang/src/birthchart/analysis/dosha');
+
+// Dasha
+const { calculateVimshottariDasha } = require('./dist/panchang/src/birthchart/dasha/vimshottari');
+
+// Divisional Charts
+const { calculateDivisionalChart } = require('./dist/panchang/src/birthchart/divisional/calculator');
+const { SHODASHVARGA_CHARTS } = require('./dist/panchang/src/birthchart/divisional/charts');
+const { calculateShodashvarga } = require('./dist/panchang/src/birthchart/divisional/shodashvarga');
+
+// Recommendations
+const { getNameSuggestions } = require('./dist/panchang/src/birthchart/recommendations/names');
+const { getRemedies } = require('./dist/panchang/src/birthchart/recommendations/remedies');
 
 module.exports = {
-  // Legacy utility modules (work offline on device)
+  // Legacy
   calculateSunriseSunset,
   calculateMoonriseMoonset,
   calculateAbhijeetMuhurt,
@@ -58,7 +60,39 @@ module.exports = {
   calculateBioRhythms,
   calculateMoonPosition,
   calculateNakshatras,
+  calculateGulikaKalam,
 
-  // v2 Panchang (requires API — Swiss Ephemeris not available on RN)
-  fetchPanchang,
+  // Panchang v2
+  calculateFullPanchang,
+  calculateMonthlyPanchang,
+  calculateTithi,
+  calculateNakshatraV2,
+  calculateYoga,
+  calculateKarana,
+  calculateRashi,
+
+  // Birth Chart
+  calculateBirthChart,
+
+  // Analysis
+  calculateTattvaBalance,
+  calculateFriendships,
+  calculateAspects,
+  calculateShadBala,
+  analyzeManglik,
+  analyzeKaalSarp,
+  analyzeGandaMoola,
+  analyzeGandanta,
+
+  // Dasha
+  calculateVimshottariDasha,
+
+  // Divisional Charts
+  calculateDivisionalChart,
+  SHODASHVARGA_CHARTS,
+  calculateShodashvarga,
+
+  // Recommendations
+  getNameSuggestions,
+  getRemedies,
 };
