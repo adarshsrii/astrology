@@ -1,13 +1,27 @@
 {
   "name": "astrology-insights",
-  "version": "2.0.0-alpha.1",
-  "description": "Shree Ganesh - Astrology Insights for Applications.",
+  "version": "2.0.0",
+  "description": "Comprehensive Vedic Panchang and astrology calculations for Node.js. Swiss Ephemeris precision, validated against Drik Panchang.",
   "main": "index.js",
   "react-native": "index.rn.js",
   "scripts": {
     "test": "node test.js",
     "test:unit": "jest",
-    "test:unit:watch": "jest --watch"
+    "test:unit:watch": "jest --watch",
+    "build": "npx tsc --outDir dist --rootDir . --declaration --skipLibCheck --module commonjs --target ES2020 --esModuleInterop --resolveJsonModule panchang/src/core/constants.ts panchang/src/core/tithi.ts panchang/src/core/nakshatra.ts panchang/src/core/yoga.ts panchang/src/core/karana.ts panchang/src/core/rashi.ts panchang/src/types.ts panchang/src/panchang-v2.ts panchang/src/timings/muhurat.ts panchang/src/timings/kalam.ts panchang/src/monthly.ts"
+  },
+  "files": [
+    "index.js",
+    "index.rn.js",
+    "lib/",
+    "panchang/",
+    "dist/",
+    "api/",
+    "Readme.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
@@ -15,22 +29,21 @@
   },
   "keywords": [
     "astrology",
-    "astrology",
-    "2024",
-    "2025",
-    "insights",
-    "astro",
+    "panchang",
+    "vedic",
+    "tithi",
+    "nakshatra",
+    "yoga",
+    "karana",
+    "muhurat",
+    "choghadiya",
     "horoscope",
     "zodiac",
-    "horoscopes",
-    "zodiac-signs",
-    "zodiac-sign",
-    "zodiac-signs-2024",
-    "zodiac-signs-2025",
-    "zodiac-signs-insights",
-    "zodiac-signs-2024-insights",
     "numerology",
-    "numerology-insights"
+    "biorhythm",
+    "sunrise-sunset",
+    "rahu-kalam",
+    "hindu-calendar"
   ],
   "author": "Adarsh Srivastava",
   "license": "MIT",

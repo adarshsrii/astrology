@@ -46,9 +46,9 @@ describe('calculateKalams', () => {
   test('Gulika Kalam is present', () => {
     const gulika = kalams.find(k => k.name === 'Gulika Kalam')!;
     expect(gulika).toBeDefined();
-    // Friday Gulika: 13:30-15:00
-    expect(gulika.startTime).toBe('13:30');
-    expect(gulika.endTime).toBe('15:00');
+    // Friday Gulika = 2nd segment: 06:10 + 90.875 = 07:41, end 09:12
+    expect(gulika.startTime).toMatch(/^07:4[0-2]$/);
+    expect(gulika.endTime).toMatch(/^09:1[1-3]$/);
   });
 
   test('Yamaganda is present', () => {

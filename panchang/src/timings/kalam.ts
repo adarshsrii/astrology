@@ -69,16 +69,15 @@ export function calculateKalams(
     // Skip if lib unavailable
   }
 
-  // 2. Gulika Kalam
+  // 2. Gulika Kalam (same segment-based calculation as Rahu)
   try {
     const calculateGulikaKalam = require('../../../lib/gulikaKalam');
-    const gulikaStr: string = calculateGulikaKalam(date, lat, lon, tz);
-    if (gulikaStr && gulikaStr.includes('-')) {
-      const [start, end] = gulikaStr.split('-');
+    const gulikaResult = calculateGulikaKalam(date, sunriseWithSec, sunsetWithSec, tz);
+    if (gulikaResult && gulikaResult.start) {
       kalams.push({
         name: 'Gulika Kalam',
-        startTime: start,
-        endTime: end,
+        startTime: toHHMM(gulikaResult.start),
+        endTime: toHHMM(gulikaResult.end),
         description: 'Inauspicious period ruled by Saturn\'s son Gulika; avoid auspicious activities',
       });
     }

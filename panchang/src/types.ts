@@ -55,6 +55,22 @@ export interface PanchangResult {
   paksha: 'Shukla' | 'Krishna';
   auspiciousMuhurats: TimingEntry[];
   inauspiciousKalams: TimingEntry[];
+
+  // Sun Movement
+  sunNakshatra: NakshatraEntry;
+  ayana: 'Uttarayana' | 'Dakshinayana';
+  ritu: { vedic: string; english: string };
+  solarMonth: string;
+
+  // Time Durations
+  dinamana: string;
+  ratrimana: string;
+  madhyahna: string;
+
+  // Calendar
+  samvatsar: string;
+  vikramSamvat?: number;
+  shakaSamvat?: number;
 }
 
 export interface CelestialPosition {

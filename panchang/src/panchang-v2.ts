@@ -30,6 +30,64 @@ function getMoonPhaseName(tithiIndex: number): string {
   return 'New Moon';
 }
 
+const RITUS = [
+  { vedic: 'Vasanta', english: 'Spring' },
+  { vedic: 'Grishma', english: 'Summer' },
+  { vedic: 'Varsha', english: 'Monsoon' },
+  { vedic: 'Sharad', english: 'Autumn' },
+  { vedic: 'Hemanta', english: 'Pre-Winter' },
+  { vedic: 'Shishira', english: 'Winter' },
+];
+
+const SOLAR_MONTHS = [
+  'Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya',
+  'Tula', 'Vrishchika', 'Dhanu', 'Makara', 'Kumbha', 'Meena',
+];
+
+const SAMVATSARS = [
+  'Prabhava', 'Vibhava', 'Shukla', 'Pramodoota', 'Prajothpatti',
+  'Angirasa', 'Srimukha', 'Bhava', 'Yuva', 'Dhata',
+  'Ishvara', 'Bahudhanya', 'Pramathi', 'Vikrama', 'Vrisha',
+  'Chitrabhanu', 'Svabhanu', 'Tarana', 'Parthiva', 'Vyaya',
+  'Sarvajit', 'Sarvadhari', 'Virodhi', 'Vikrita', 'Khara',
+  'Nandana', 'Vijaya', 'Jaya', 'Manmatha', 'Durmukhi',
+  'Hevilambi', 'Vilambi', 'Vikari', 'Sharvari', 'Plava',
+  'Shubhakrit', 'Shobhakrit', 'Krodhi', 'Vishvavasu', 'Parabhava',
+  'Plavanga', 'Kilaka', 'Saumya', 'Sadharana', 'Virodhikrit',
+  'Paridhaavi', 'Pramadicha', 'Ananda', 'Rakshasa', 'Nala',
+  'Pingala', 'Kalayukti', 'Siddharthi', 'Raudri', 'Durmathi',
+  'Dundubhi', 'Rudhirodgari', 'Raktakshi', 'Krodhana', 'Akshaya',
+];
+
+function calculateDurations(sunriseStr: string, sunsetStr: string) {
+  const [sh, sm] = sunriseStr.split(':').map(Number);
+  const [eh, em] = sunsetStr.split(':').map(Number);
+  const sunriseMin = sh * 60 + sm;
+  const sunsetMin = eh * 60 + em;
+  const dayMins = sunsetMin - sunriseMin;
+  const nightMins = 1440 - dayMins;
+  const midMins = sunriseMin + Math.floor(dayMins / 2);
+
+  const fmtDuration = (mins: number) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${h}h ${String(m).padStart(2, '0')}m`;
+  };
+
+  const fmtTime = (mins: number) => {
+    const h = mins % 1440;
+    const hh = Math.floor(h / 60);
+    const mm = h % 60;
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  };
+
+  return {
+    dinamana: fmtDuration(dayMins),
+    ratrimana: fmtDuration(nightMins),
+    madhyahna: fmtTime(midMins),
+  };
+}
+
 function formatTimeHHMM(date: Date | null, timezone: string): string {
   if (!date) return '';
   return date.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: false });
@@ -41,12 +99,56 @@ export function calculateFullPanchang(
   longitude: number,
   timezone: string,
 ): PanchangResult {
-  // If date string passed, use current time today (not fixed 6 AM)
-  // This ensures illumination and progress values are real-time
-  const inputDate = typeof date === 'string'
-    ? (date === new Date().toISOString().split('T')[0] ? new Date() : new Date(date + 'T12:00:00'))
+  // Use noon local time as an initial reference for sunrise/sunset calculation.
+  // After computing sunrise, we re-compute planetary positions at sunrise
+  // to match Drik Panchang convention (prevailing tithi/nakshatra at sunrise).
+  const noonDate = typeof date === 'string'
+    ? new Date(date + 'T12:00:00')
     : date;
   const location: Location = { latitude, longitude, timezone };
+
+  // Helper: compute sidereal sun/moon longitudes for a given Date
+  function computeLongitudes(dt: Date, ayan: number): { sunLon: number; moonLon: number } {
+    try {
+      const { Ephemeris } = require('./calculations/ephemeris');
+      const eph = new Ephemeris();
+      const sunT = eph.calculatePosition(dt, 'Sun');
+      const moonT = eph.calculatePosition(dt, 'Moon');
+      return {
+        sunLon: normalizeAngle(sunT.longitude - ayan),
+        moonLon: normalizeAngle(moonT.longitude - ayan),
+      };
+    } catch {
+      // Fallback: Jean Meeus low-precision
+      const jd = dt.getTime() / 86400000 + 2440587.5;
+      const T = (jd - 2451545.0) / 36525;
+      const L0 = normalizeAngle(280.46646 + 36000.76983 * T);
+      const M = normalizeAngle(357.52911 + 35999.05029 * T);
+      const Mrad = M * Math.PI / 180;
+      const C = (1.914602 - 0.004817 * T) * Math.sin(Mrad)
+               + 0.019993 * Math.sin(2 * Mrad)
+               + 0.000289 * Math.sin(3 * Mrad);
+      const sLon = normalizeAngle(normalizeAngle(L0 + C) - ayan);
+
+      const Lm = normalizeAngle(218.3165 + 481267.8813 * T);
+      const Mm = normalizeAngle(134.9634 + 477198.8676 * T);
+      const F = normalizeAngle(93.2721 + 483202.0175 * T);
+      const MmRad = Mm * Math.PI / 180;
+      const FRad = F * Math.PI / 180;
+      const moonCorr = 6.289 * Math.sin(MmRad)
+                     - 1.274 * Math.sin(MmRad - 2 * FRad)
+                     + 0.658 * Math.sin(2 * FRad)
+                     - 0.186 * Math.sin(Mrad)
+                     - 0.114 * Math.sin(2 * FRad)
+                     + 0.059 * Math.sin(2 * MmRad)
+                     - 0.057 * Math.sin(MmRad - 2 * FRad + Mrad)
+                     + 0.053 * Math.sin(MmRad + 2 * FRad)
+                     + 0.046 * Math.sin(2 * FRad - Mrad)
+                     + 0.041 * Math.sin(MmRad - Mrad);
+      const mLon = normalizeAngle(normalizeAngle(Lm + moonCorr) - ayan);
+      return { sunLon: sLon, moonLon: mLon };
+    }
+  }
 
   // Try to use Swiss Ephemeris, fall back to SunCalc-based calculations
   let sunLon = 0, moonLon = 0;
@@ -57,75 +159,29 @@ export function calculateFullPanchang(
   try {
     const { Ephemeris } = require('./calculations/ephemeris');
     const ephemeris = new Ephemeris();
+    ayanamsa = ephemeris.calculate_lahiri_ayanamsa(noonDate);
+  } catch {
+    // Use default ayanamsa
+  }
 
-    ayanamsa = ephemeris.calculate_lahiri_ayanamsa(inputDate);
-    const sunTropical = ephemeris.calculatePosition(inputDate, 'Sun');
-    const moonTropical = ephemeris.calculatePosition(inputDate, 'Moon');
-    sunLon = normalizeAngle(sunTropical.longitude - ayanamsa);
-    moonLon = normalizeAngle(moonTropical.longitude - ayanamsa);
-
-    // Use SunCalc for sunrise/sunset (more accurate than ephemeris wrapper)
+  // Get sunrise/sunset first
+  try {
     const SunCalc = require('suncalc');
-    const times = SunCalc.getTimes(inputDate, latitude, longitude);
+    const times = SunCalc.getTimes(noonDate, latitude, longitude);
     sunrise = times.sunrise;
     sunset = times.sunset;
-    const moonTimes = SunCalc.getMoonTimes(inputDate, latitude, longitude);
+    const moonTimes = SunCalc.getMoonTimes(noonDate, latitude, longitude);
     moonrise = moonTimes.rise ?? null;
     moonset = moonTimes.set ?? null;
-  } catch (err) {
-    // Fallback: use SunCalc for everything
-    try {
-      const SunCalc = require('suncalc');
-      const times = SunCalc.getTimes(inputDate, latitude, longitude);
-      sunrise = times.sunrise;
-      sunset = times.sunset;
-      const moonTimes = SunCalc.getMoonTimes(inputDate, latitude, longitude);
-      moonrise = moonTimes.rise;
-      moonset = moonTimes.set;
-
-      // Low-precision sun/moon ecliptic longitude via Jean Meeus algorithms
-      // (avoids swisseph entirely, accurate to ~1°)
-      const jd = inputDate.getTime() / 86400000 + 2440587.5;
-      const T = (jd - 2451545.0) / 36525;
-      // Sun geometric mean longitude
-      const L0 = normalizeAngle(280.46646 + 36000.76983 * T);
-      // Sun mean anomaly
-      const M = normalizeAngle(357.52911 + 35999.05029 * T);
-      const Mrad = M * Math.PI / 180;
-      // Sun equation of centre
-      const C = (1.914602 - 0.004817 * T) * Math.sin(Mrad)
-               + 0.019993 * Math.sin(2 * Mrad)
-               + 0.000289 * Math.sin(3 * Mrad);
-      const sunTropicalLon = normalizeAngle(L0 + C);
-      sunLon = normalizeAngle(sunTropicalLon - ayanamsa);
-
-      // Moon mean longitude
-      const Lm = normalizeAngle(218.3165 + 481267.8813 * T);
-      // Moon mean anomaly
-      const Mm = normalizeAngle(134.9634 + 477198.8676 * T);
-      // Moon argument of latitude
-      const F = normalizeAngle(93.2721 + 483202.0175 * T);
-      // Sun mean anomaly (already have M above)
-      const MmRad = Mm * Math.PI / 180;
-      const MRad = Mrad;
-      const FRad = F * Math.PI / 180;
-      // Simplified moon longitude correction
-      const moonCorr = 6.289 * Math.sin(MmRad)
-                     - 1.274 * Math.sin(MmRad - 2 * FRad)
-                     + 0.658 * Math.sin(2 * FRad)
-                     - 0.186 * Math.sin(MRad)
-                     - 0.114 * Math.sin(2 * FRad)
-                     + 0.059 * Math.sin(2 * MmRad)
-                     - 0.057 * Math.sin(MmRad - 2 * FRad + MRad)
-                     + 0.053 * Math.sin(MmRad + 2 * FRad)
-                     + 0.046 * Math.sin(2 * FRad - MRad)
-                     + 0.041 * Math.sin(MmRad - MRad);
-      const moonTropicalLon = normalizeAngle(Lm + moonCorr);
-      moonLon = normalizeAngle(moonTropicalLon - ayanamsa);
-    } catch {
-      // No ephemeris available at all
-    }
+  } catch {
+    // No SunCalc available
   }
+
+  // Compute longitudes at SUNRISE (Drik Panchang convention: prevailing tithi at sunrise)
+  const sunriseDate = sunrise ?? noonDate;
+  const lons = computeLongitudes(sunriseDate, ayanamsa);
+  sunLon = lons.sunLon;
+  moonLon = lons.moonLon;
 
   const tithi = calculateTithi(sunLon, moonLon);
   const nakshatra = calculateNakshatra(moonLon);
@@ -134,8 +190,60 @@ export function calculateFullPanchang(
   const moonSign = calculateRashi(moonLon);
   const sunSign = calculateRashi(sunLon);
 
+  // Sun Nakshatra
+  const sunNak = calculateNakshatra(sunLon);
+
+  // Ayana: Uttarayana from Makara Sankranti (Sun enters Capricorn, ~270°) to Sun at ~90° (end of Gemini)
+  // Sidereal: 270°→360°→0°→90° = Uttarayana; 90°→270° = Dakshinayana
+  const ayana: 'Uttarayana' | 'Dakshinayana' = (sunLon >= 270 || sunLon < 90) ? 'Uttarayana' : 'Dakshinayana';
+
+  // Ritu (season) based on Sun's sidereal sign
+  // Ritu mapping (North Indian): Pisces-Aries=Vasanta, Taurus-Gemini=Grishma, etc.
+  // Shift by -1 from sign number: sign 12(Pisces)→0, sign 1(Aries)→0, sign 2→1, etc.
+  const rituSignMap: Record<number, number> = {
+    12: 0, 1: 0,  // Vasanta (Pisces, Aries)
+    2: 1, 3: 1,   // Grishma (Taurus, Gemini)
+    4: 2, 5: 2,   // Varsha (Cancer, Leo)
+    6: 3, 7: 3,   // Sharad (Virgo, Libra)
+    8: 4, 9: 4,   // Hemanta (Scorpio, Sagittarius)
+    10: 5, 11: 5, // Shishira (Capricorn, Aquarius)
+  };
+  const ritu = RITUS[rituSignMap[sunSign.number] ?? 0];
+
+  // Solar month
+  const solarMonth = SOLAR_MONTHS[sunSign.number - 1];
+
+  // Samvatsar (60-year cycle)
+  // Vikram new year = Chaitra Shukla Pratipad (day after Chaitra Amavasya)
+  // This falls when Sun is in Pisces (Meena) and Moon is new → Shukla Pratipad
+  // Approximation: if Sun is in Pisces (sign 12) and tithi is in Shukla Paksha,
+  // we're in the new Vikram year. Otherwise check if we've passed the spring new moon.
+  //
+  // More robust: The Vikram year changes when Chaitra Shukla Paksha begins.
+  // Chaitra = lunar month when Sun is in Pisces/Aries.
+  // If tithi is Shukla (waxing) and Sun is in Pisces → new year has started.
+  // If tithi is Krishna (waning) and Sun is in Pisces → still old year (Chaitra Krishna = Phalguna Amanta).
+  const gregYear = noonDate.getFullYear();
+  const sunInPisces = sunSign.number === 12; // Meena
+  const sunInAries = sunSign.number === 1;   // Mesha
+  const isShukla = tithi.paksha === 'Shukla';
+
+  // New year starts when: Sun in Pisces + Shukla Paksha (Chaitra Shukla)
+  // OR Sun has moved past Pisces into Aries+ (definitely new year)
+  const newYearStarted = (sunInPisces && isShukla) ||
+    (sunSign.number >= 1 && sunSign.number <= 6); // Aries through Virgo = after spring
+
+  // But Jan-Feb is always before new year (Sun in Capricorn/Aquarius)
+  const month = noonDate.getMonth();
+  const isEarlyYear = month <= 1; // Jan, Feb always before Hindu new year
+
+  const vikramSamvat = (newYearStarted && !isEarlyYear) ? gregYear + 57 : gregYear + 56;
+  const shakaSamvat = (newYearStarted && !isEarlyYear) ? gregYear - 78 : gregYear - 79;
+  const samvatsarIndex = ((vikramSamvat - 51) % 60 + 60) % 60;
+  const samvatsar = SAMVATSARS[samvatsarIndex];
+
   // Use the date string to determine weekday (timezone-independent)
-  const varaDateStr = typeof date === 'string' ? date : inputDate.toISOString().split('T')[0];
+  const varaDateStr = typeof date === 'string' ? date : noonDate.toISOString().split('T')[0];
   const varaDate = new Date(varaDateStr + 'T12:00:00Z'); // Noon UTC — safe for any timezone
   const vara = {
     name: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDate.getUTCDay()],
@@ -147,13 +255,13 @@ export function calculateFullPanchang(
   let moonIllumination = Math.round(((1 - Math.cos(diff * Math.PI / 180)) / 2) * 100);
   try {
     const SunCalc = require('suncalc');
-    const illum = SunCalc.getMoonIllumination(inputDate);
+    const illum = SunCalc.getMoonIllumination(noonDate);
     moonIllumination = Math.round(illum.fraction * 100);
   } catch {};
 
   const sunriseStr = formatTimeHHMM(sunrise, timezone);
   const sunsetStr = formatTimeHHMM(sunset, timezone);
-  const dateStr = inputDate.toISOString().split('T')[0];
+  const dateStr = noonDate.toISOString().split('T')[0];
 
   // Calculate auspicious muhurats and inauspicious kalams
   let auspiciousMuhurats: { name: string; startTime: string; endTime: string; description?: string }[] = [];
@@ -171,6 +279,9 @@ export function calculateFullPanchang(
       // Timing calculation failed; return empty array
     }
   }
+
+  // Dinamana / Ratrimana / Madhyahna
+  const durations = (sunriseStr && sunsetStr) ? calculateDurations(sunriseStr, sunsetStr) : { dinamana: '', ratrimana: '', madhyahna: '' };
 
   return {
     date: dateStr,
@@ -190,5 +301,15 @@ export function calculateFullPanchang(
     paksha: tithi.paksha,
     auspiciousMuhurats,
     inauspiciousKalams,
+    sunNakshatra: { name: sunNak.name, number: sunNak.number, pada: sunNak.pada, lord: sunNak.lord, deity: sunNak.deity, startTime: '', endTime: '', progress: sunNak.progress },
+    ayana,
+    ritu,
+    solarMonth,
+    dinamana: durations.dinamana,
+    ratrimana: durations.ratrimana,
+    madhyahna: durations.madhyahna,
+    samvatsar,
+    vikramSamvat: vikramSamvat,
+    shakaSamvat: shakaSamvat,
   };
 }

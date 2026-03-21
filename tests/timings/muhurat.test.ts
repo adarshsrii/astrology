@@ -63,16 +63,17 @@ describe('calculateMuhurats', () => {
     expect(vijaya).toBeDefined();
     const startParts = vijaya.startTime.split(':').map(Number);
     const startMin = startParts[0] * 60 + startParts[1];
-    // 13th muhurta: 06:10 + 12*48.47 = 06:10 + 582 = 15:52
-    expect(startMin).toBeGreaterThanOrEqual(15 * 60);
-    expect(startMin).toBeLessThanOrEqual(16 * 60 + 30);
+    // 11th muhurta (index 10): 06:10 + 10*48.47 = 06:10 + 485 = 14:15
+    expect(startMin).toBeGreaterThanOrEqual(14 * 60);
+    expect(startMin).toBeLessThanOrEqual(15 * 60);
   });
 
   test('Godhuli Muhurat is around sunset', () => {
     const godhuli = muhurats.find(m => m.name === 'Godhuli Muhurat')!;
     expect(godhuli).toBeDefined();
-    expect(godhuli.startTime).toBe('18:05');
-    expect(godhuli.endTime).toBe('18:29');
+    // Godhuli: sunset-1 to sunset+22
+    expect(godhuli.startTime).toBe('18:16');
+    expect(godhuli.endTime).toBe('18:39');
   });
 
   test('Nishita Muhurat is around midnight', () => {

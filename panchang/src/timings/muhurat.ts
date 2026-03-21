@@ -76,11 +76,14 @@ export function calculateMuhurats(
     description: 'Most auspicious time for meditation & spiritual practice, 2 muhurtas before sunrise',
   });
 
-  // 2. Pratah Sandhya — sunrise +/- 24 min
+  // 2. Pratah Sandhya — from ~1h12m (1.5 muhurtas) before sunrise to sunrise
+  // Drik Panchang uses: start = sunrise - (nightMuhurta * 1.5), end = sunrise
+  const nightMuhurta = nightDuration / 15;
+  const pratahStart = sunriseMin - (nightMuhurta * 1.5);
   muhurats.push({
     name: 'Pratah Sandhya',
-    startTime: minutesToHHMM(sunriseMin - 24),
-    endTime: minutesToHHMM(sunriseMin + 24),
+    startTime: minutesToHHMM(pratahStart),
+    endTime: minutesToHHMM(sunriseMin),
     description: 'Morning twilight period, ideal for Sandhyavandanam',
   });
 
@@ -109,9 +112,10 @@ export function calculateMuhurats(
     });
   }
 
-  // 4. Vijaya Muhurat — 13th muhurta of the day (index 12)
-  const vijayaStart = sunriseMin + muhurtaDuration * 12;
-  const vijayaEnd = sunriseMin + muhurtaDuration * 13;
+  // 4. Vijaya Muhurat — the muhurta spanning the midpoint between Abhijit and sunset
+  // Drik Panchang: roughly the 11th muhurta (index 10) from sunrise
+  const vijayaStart = sunriseMin + muhurtaDuration * 10;
+  const vijayaEnd = sunriseMin + muhurtaDuration * 11;
   muhurats.push({
     name: 'Vijaya Muhurat',
     startTime: minutesToHHMM(vijayaStart),
@@ -119,19 +123,22 @@ export function calculateMuhurats(
     description: 'Afternoon auspicious period for victory & success in endeavors',
   });
 
-  // 5. Godhuli Muhurat — sunset +/- 12 min
+  // 5. Godhuli Muhurat — starts ~1 min before sunset, lasts ~24 min (sunset-1 to sunset+23)
+  // Drik Panchang pattern: from ~sunset to sunset + half a nightMuhurta
   muhurats.push({
     name: 'Godhuli Muhurat',
-    startTime: minutesToHHMM(sunsetMin - 12),
-    endTime: minutesToHHMM(sunsetMin + 12),
+    startTime: minutesToHHMM(sunsetMin - 1),
+    endTime: minutesToHHMM(sunsetMin + 22),
     description: 'Cow-dust time around sunset, auspicious for marriages & ceremonies',
   });
 
-  // 6. Sayahna Sandhya — sunset +/- 36 min
+  // 6. Sayahna Sandhya — from sunset to sunset + 1.5 night muhurtas
+  // Mirrors Pratah Sandhya: Pratah = 1.5 night muhurtas before sunrise, Sayahna = 1.5 after sunset
+  const sayahnaEnd = sunsetMin + (nightMuhurta * 1.5);
   muhurats.push({
     name: 'Sayahna Sandhya',
-    startTime: minutesToHHMM(sunsetMin - 36),
-    endTime: minutesToHHMM(sunsetMin + 36),
+    startTime: minutesToHHMM(sunsetMin),
+    endTime: minutesToHHMM(sayahnaEnd),
     description: 'Evening twilight period, ideal for evening prayers & Sandhyavandanam',
   });
 
