@@ -539,3 +539,20 @@ export { calculateNakshatra } from './core/nakshatra';
 export { calculateYoga } from './core/yoga';
 export { calculateKarana } from './core/karana';
 export { calculateRashi } from './core/rashi';
+
+// Birth Chart (Kundli) module
+export { calculateBirthChart } from './birthchart/index';
+export type {
+  BirthData,
+  BirthChartResult,
+  GrahaPosition,
+  GrahaName,
+  Dignity,
+  HouseSystemType,
+  AyanamsaType,
+  HouseInfo,
+  ChartLayout,
+  ChartBox,
+  LagnaInfo,
+} from './birthchart/index';
+export { ALL_GRAHAS } from './birthchart/index';

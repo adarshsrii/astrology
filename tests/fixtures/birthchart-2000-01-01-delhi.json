@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "date": "2000-01-01",
+    "time": "04:30",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "timezone": "Asia/Kolkata",
+    "ayanamsa": "lahiri"
+  },
+  "lagna": {
+    "signName": "Scorpio",
+    "signNumber": 8
+  },
+  "planets": {
+    "Sun": { "signName": "Sagittarius", "signNumber": 9, "retrograde": false },
+    "Moon": { "signName": "Libra", "signNumber": 7, "retrograde": false },
+    "Mars": { "signName": "Aquarius", "signNumber": 11, "retrograde": false },
+    "Mercury": { "signName": "Sagittarius", "signNumber": 9, "retrograde": false, "combust": true },
+    "Jupiter": { "signName": "Aries", "signNumber": 1, "retrograde": false },
+    "Venus": { "signName": "Scorpio", "signNumber": 8, "retrograde": false },
+    "Saturn": { "signName": "Aries", "signNumber": 1, "retrograde": true },
+    "Rahu": { "signName": "Cancer", "signNumber": 4, "retrograde": true },
+    "Ketu": { "signName": "Capricorn", "signNumber": 10, "retrograde": true }
+  },
+  "vara": "Saturday"
+}

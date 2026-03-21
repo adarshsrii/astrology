@@ -53,6 +53,9 @@ function calculatePanchang(date, latitude, longitude, timezone, locationName, la
   );
 }
 
+// Birth Chart module
+const { calculateBirthChart } = require('./panchang/src/birthchart/index');
+
 module.exports = {
   calculateSunriseSunset,
   calculateMoonriseMoonset,
@@ -72,4 +75,5 @@ module.exports = {
   calculateYoga,
   calculateKarana,
   calculateRashi,
+  calculateBirthChart,
 };

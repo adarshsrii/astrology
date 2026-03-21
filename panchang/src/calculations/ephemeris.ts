@@ -613,6 +613,121 @@ export class Ephemeris {
         return positions;
     }
 
+    /**
+     * Calculate house cusps and ascendant using Swiss Ephemeris swe_houses.
+     * @param date UTC Date for calculation
+     * @param latitude Geographic latitude
+     * @param longitude Geographic longitude
+     * @param houseSystem House system type ('whole_sign' | 'equal' | 'placidus')
+     * @returns Object with ascendant, mc, and cusps[1..12]
+     */
+    calculateHouseCusps(
+        date: Date,
+        latitude: number,
+        longitude: number,
+        houseSystem: string,
+    ): { ascendant: number; mc: number; cusps: number[] } {
+        const jd = this.date_to_julian(date);
+
+        // Map house system to Swiss Ephemeris code
+        const systemCodes: Record<string, string> = {
+            whole_sign: 'W',
+            equal: 'E',
+            placidus: 'P',
+        };
+        const hsys = systemCodes[houseSystem] || 'W';
+
+        try {
+            const result = (swisseph as any).swe_houses(jd, latitude, longitude, hsys);
+
+            if (result && result.house) {
+                // result.house is array of 12 cusp longitudes (0-indexed)
+                // ascendant and mc may be in ascmc array or as direct properties
+                const cusps: number[] = [0]; // index 0 is unused
+                for (let i = 0; i < 12; i++) {
+                    cusps.push(result.house[i]);
+                }
+
+                let ascendant: number;
+                let mc: number;
+                if (result.ascmc) {
+                    ascendant = result.ascmc[0];
+                    mc = result.ascmc[1];
+                } else {
+                    ascendant = result.ascendant || cusps[1];
+                    mc = result.mc || cusps[10] || 0;
+                }
+
+                return { ascendant, mc, cusps };
+            }
+
+            throw new Error('swe_houses returned invalid result');
+        } catch (error) {
+            // Fallback: use Sun position as rough ascendant proxy
+            console.warn('swe_houses failed, using fallback:', error);
+            const sunPos = this.calculatePosition(date, 'Sun');
+            const asc = normalizeAngle(sunPos.longitude);
+            const cusps: number[] = [0];
+            for (let i = 0; i < 12; i++) {
+                cusps.push(normalizeAngle(asc + i * 30));
+            }
+            return { ascendant: asc, mc: normalizeAngle(asc + 270), cusps };
+        }
+    }
+
+    /**
+     * Calculate position WITH speed (degrees/day) for a celestial body.
+     * Uses SEFLG_SPEED flag.
+     * @param date Date for calculation
+     * @param body Celestial body name
+     * @returns Object with longitude, latitude, and speed
+     */
+    calculatePositionWithSpeed(date: Date, body: string): {
+        longitude: number; latitude: number; speed: number;
+    } {
+        const jd = this.date_to_julian(date);
+        const planet_id = this.get_planet_id(body);
+
+        try {
+            let result: any;
+
+            if (body === 'Ketu') {
+                result = swisseph.swe_calc_ut(
+                    jd,
+                    swisseph.SE_MEAN_NODE,
+                    swisseph.SEFLG_SWIEPH | swisseph.SEFLG_SPEED,
+                );
+                if (result && 'longitude' in result) {
+                    return {
+                        longitude: normalizeAngle(result.longitude + 180),
+                        latitude: -result.latitude,
+                        speed: -(result.longitudeSpeed || 0),
+                    };
+                }
+            } else {
+                result = swisseph.swe_calc_ut(
+                    jd,
+                    planet_id,
+                    swisseph.SEFLG_SWIEPH | swisseph.SEFLG_SPEED,
+                );
+            }
+
+            if (result && 'longitude' in result) {
+                return {
+                    longitude: normalizeAngle(result.longitude),
+                    latitude: result.latitude,
+                    speed: result.longitudeSpeed || 0,
+                };
+            }
+
+            throw new Error('swe_calc_ut returned invalid result');
+        } catch (error) {
+            // Return fallback with zero speed
+            const pos = this.get_fallback_position(body, date);
+            return { longitude: pos.longitude, latitude: pos.latitude, speed: 0 };
+        }
+    }
+
     cleanup(): void {
         try {
             swisseph.swe_close();
