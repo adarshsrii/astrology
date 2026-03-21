@@ -1,7 +1,7 @@
 {
   "name": "astrology-insights",
-  "version": "2.0.0",
-  "description": "Comprehensive Vedic Panchang and astrology calculations for Node.js. Swiss Ephemeris precision, validated against Drik Panchang.",
+  "version": "2.1.0",
+  "description": "Comprehensive Vedic astrology engine for Node.js — Panchang, birth charts (Kundli), Vimshottari Dasha, divisional charts, dosha analysis, and planetary remedies. Swiss Ephemeris precision, validated against Drik Panchang.",
   "main": "index.js",
   "react-native": "index.rn.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "panchang/",
     "dist/",
     "api/",
-    "Readme.md",
+    "README.md",
     "LICENSE"
   ],
   "engines": {
@@ -43,7 +43,15 @@
     "biorhythm",
     "sunrise-sunset",
     "rahu-kalam",
-    "hindu-calendar"
+    "hindu-calendar",
+    "birth-chart",
+    "kundli",
+    "vimshottari",
+    "dasha",
+    "navamsa",
+    "divisional-charts",
+    "dosha",
+    "manglik"
   ],
   "author": "Adarsh Srivastava",
   "license": "MIT",
