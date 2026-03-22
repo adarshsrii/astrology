@@ -190,6 +190,28 @@ export function calculateFullPanchang(
   const moonSign = calculateRashi(moonLon);
   const sunSign = calculateRashi(sunLon);
 
+  // Check for tithi/nakshatra/yoga/karana transitions during the day (at sunset)
+  let tithi2: any = null;
+  let nakshatra2: any = null;
+  let yoga2: any = null;
+  let karana2: any = null;
+  if (sunset) {
+    try {
+      const sunsetLons = computeLongitudes(sunset, ayanamsa);
+      const tithiAtSunset = calculateTithi(sunsetLons.sunLon, sunsetLons.moonLon);
+      const nakshatraAtSunset = calculateNakshatra(sunsetLons.moonLon);
+      const yogaAtSunset = calculateYoga(sunsetLons.sunLon, sunsetLons.moonLon);
+      const karanaAtSunset = calculateKarana(sunsetLons.sunLon, sunsetLons.moonLon);
+
+      if (tithiAtSunset.number !== tithi.number) tithi2 = tithiAtSunset;
+      if (nakshatraAtSunset.number !== nakshatra.number) nakshatra2 = nakshatraAtSunset;
+      if (yogaAtSunset.number !== yoga.number) yoga2 = yogaAtSunset;
+      if (karanaAtSunset.number !== karana.number) karana2 = karanaAtSunset;
+    } catch {
+      // Sunset calculation failed, skip transition detection
+    }
+  }
+
   // Sun Nakshatra
   const sunNak = calculateNakshatra(sunLon);
 
@@ -290,10 +312,22 @@ export function calculateFullPanchang(
     sunset: sunsetStr,
     moonrise: formatTimeHHMM(moonrise, timezone),
     moonset: formatTimeHHMM(moonset, timezone),
-    tithi: [{ name: tithi.name, number: tithi.number, startTime: '', endTime: '', progress: tithi.progress }],
-    nakshatra: [{ name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: '', endTime: '', progress: nakshatra.progress }],
-    yoga: [{ name: yoga.name, number: yoga.number, startTime: '', endTime: '', progress: yoga.progress }],
-    karana: [{ name: karana.name, number: karana.number, startTime: '', endTime: '', progress: karana.progress }],
+    tithi: [
+      { name: tithi.name, number: tithi.number, startTime: '', endTime: '', progress: tithi.progress },
+      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: '', endTime: '', progress: tithi2.progress }] : []),
+    ],
+    nakshatra: [
+      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: '', endTime: '', progress: nakshatra.progress },
+      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: '', endTime: '', progress: nakshatra2.progress }] : []),
+    ],
+    yoga: [
+      { name: yoga.name, number: yoga.number, startTime: '', endTime: '', progress: yoga.progress },
+      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: '', endTime: '', progress: yoga2.progress }] : []),
+    ],
+    karana: [
+      { name: karana.name, number: karana.number, startTime: '', endTime: '', progress: karana.progress },
+      ...(karana2 ? [{ name: karana2.name, number: karana2.number, startTime: '', endTime: '', progress: karana2.progress }] : []),
+    ],
     vara,
     moonSign,
     sunSign,
