@@ -190,11 +190,57 @@ export function calculateFullPanchang(
   const moonSign = calculateRashi(moonLon);
   const sunSign = calculateRashi(sunLon);
 
-  // Check for tithi/nakshatra/yoga/karana transitions during the day (at sunset)
+  // ── Transition detection with binary search for exact time ──────────────
+  // Check sunrise vs sunset. If tithi/nakshatra/yoga/karana changed,
+  // binary-search for the exact transition moment.
+
+  function findTransitionTime(
+    startDate: Date,
+    endDate: Date,
+    getValueFn: (dt: Date) => number,
+    startValue: number,
+    maxIterations: number = 14, // ~1 minute precision over 12 hours
+  ): Date {
+    let lo = startDate.getTime();
+    let hi = endDate.getTime();
+    for (let i = 0; i < maxIterations; i++) {
+      const mid = Math.floor((lo + hi) / 2);
+      const midDate = new Date(mid);
+      const lons = computeLongitudes(midDate, ayanamsa);
+      const val = getValueFn(midDate);
+      if (val === startValue) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return new Date(hi);
+  }
+
+  function formatTransitionTime(dt: Date, tz: string): string {
+    try {
+      return dt.toLocaleTimeString('en-IN', {
+        timeZone: tz,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      const h = dt.getUTCHours();
+      const m = dt.getUTCMinutes();
+      return `${h % 12 || 12}:${m < 10 ? '0' + m : m} ${h < 12 ? 'AM' : 'PM'}`;
+    }
+  }
+
   let tithi2: any = null;
   let nakshatra2: any = null;
   let yoga2: any = null;
   let karana2: any = null;
+  let tithiTransitionTime = '';
+  let nakshatraTransitionTime = '';
+  let yogaTransitionTime = '';
+  let karanaTransitionTime = '';
+
   if (sunset) {
     try {
       const sunsetLons = computeLongitudes(sunset, ayanamsa);
@@ -203,12 +249,45 @@ export function calculateFullPanchang(
       const yogaAtSunset = calculateYoga(sunsetLons.sunLon, sunsetLons.moonLon);
       const karanaAtSunset = calculateKarana(sunsetLons.sunLon, sunsetLons.moonLon);
 
-      if (tithiAtSunset.number !== tithi.number) tithi2 = tithiAtSunset;
-      if (nakshatraAtSunset.number !== nakshatra.number) nakshatra2 = nakshatraAtSunset;
-      if (yogaAtSunset.number !== yoga.number) yoga2 = yogaAtSunset;
-      if (karanaAtSunset.number !== karana.number) karana2 = karanaAtSunset;
+      const sunriseDate = sunrise ?? noonDate;
+
+      if (tithiAtSunset.number !== tithi.number) {
+        tithi2 = tithiAtSunset;
+        const transTime = findTransitionTime(sunriseDate, sunset, (dt) => {
+          const l = computeLongitudes(dt, ayanamsa);
+          return calculateTithi(l.sunLon, l.moonLon).number;
+        }, tithi.number);
+        tithiTransitionTime = formatTransitionTime(transTime, timezone);
+      }
+
+      if (nakshatraAtSunset.number !== nakshatra.number) {
+        nakshatra2 = nakshatraAtSunset;
+        const transTime = findTransitionTime(sunriseDate, sunset, (dt) => {
+          const l = computeLongitudes(dt, ayanamsa);
+          return calculateNakshatra(l.moonLon).number;
+        }, nakshatra.number);
+        nakshatraTransitionTime = formatTransitionTime(transTime, timezone);
+      }
+
+      if (yogaAtSunset.number !== yoga.number) {
+        yoga2 = yogaAtSunset;
+        const transTime = findTransitionTime(sunriseDate, sunset, (dt) => {
+          const l = computeLongitudes(dt, ayanamsa);
+          return calculateYoga(l.sunLon, l.moonLon).number;
+        }, yoga.number);
+        yogaTransitionTime = formatTransitionTime(transTime, timezone);
+      }
+
+      if (karanaAtSunset.number !== karana.number) {
+        karana2 = karanaAtSunset;
+        const transTime = findTransitionTime(sunriseDate, sunset, (dt) => {
+          const l = computeLongitudes(dt, ayanamsa);
+          return calculateKarana(l.sunLon, l.moonLon).number;
+        }, karana.number);
+        karanaTransitionTime = formatTransitionTime(transTime, timezone);
+      }
     } catch {
-      // Sunset calculation failed, skip transition detection
+      // Transition detection failed, skip
     }
   }
 
@@ -313,16 +392,16 @@ export function calculateFullPanchang(
     moonrise: formatTimeHHMM(moonrise, timezone),
     moonset: formatTimeHHMM(moonset, timezone),
     tithi: [
-      { name: tithi.name, number: tithi.number, startTime: '', endTime: '', progress: tithi.progress },
-      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: '', endTime: '', progress: tithi2.progress }] : []),
+      { name: tithi.name, number: tithi.number, startTime: '', endTime: tithiTransitionTime, progress: tithi.progress },
+      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: tithiTransitionTime, endTime: '', progress: tithi2.progress }] : []),
     ],
     nakshatra: [
-      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: '', endTime: '', progress: nakshatra.progress },
-      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: '', endTime: '', progress: nakshatra2.progress }] : []),
+      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: '', endTime: nakshatraTransitionTime, progress: nakshatra.progress },
+      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: nakshatraTransitionTime, endTime: '', progress: nakshatra2.progress }] : []),
     ],
     yoga: [
-      { name: yoga.name, number: yoga.number, startTime: '', endTime: '', progress: yoga.progress },
-      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: '', endTime: '', progress: yoga2.progress }] : []),
+      { name: yoga.name, number: yoga.number, startTime: '', endTime: yogaTransitionTime, progress: yoga.progress },
+      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: yogaTransitionTime, endTime: '', progress: yoga2.progress }] : []),
     ],
     karana: [
       { name: karana.name, number: karana.number, startTime: '', endTime: '', progress: karana.progress },
