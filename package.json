@@ -1,6 +1,6 @@
 {
   "name": "astrology-insights",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Comprehensive Vedic astrology engine for Node.js — Panchang, birth charts (Kundli), Vimshottari Dasha, divisional charts, dosha analysis, and planetary remedies. Swiss Ephemeris precision, validated against Drik Panchang.",
   "main": "index.js",
   "react-native": "index.rn.js",
@@ -60,6 +60,7 @@
   },
   "homepage": "https://github.com/adarshsrii/astrology#readme",
   "dependencies": {
+    "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "luxon": "^3.5.0",
     "suncalc": "^1.9.0",
