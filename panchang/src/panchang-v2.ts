@@ -392,20 +392,20 @@ export function calculateFullPanchang(
     moonrise: formatTimeHHMM(moonrise, timezone),
     moonset: formatTimeHHMM(moonset, timezone),
     tithi: [
-      { name: tithi.name, number: tithi.number, startTime: '', endTime: tithiTransitionTime, progress: tithi.progress },
-      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: tithiTransitionTime, endTime: '', progress: tithi2.progress }] : []),
+      { name: tithi.name, number: tithi.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: tithiTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi.progress },
+      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: tithiTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi2.progress }] : []),
     ],
     nakshatra: [
-      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: '', endTime: nakshatraTransitionTime, progress: nakshatra.progress },
-      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: nakshatraTransitionTime, endTime: '', progress: nakshatra2.progress }] : []),
+      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: nakshatraTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra.progress },
+      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: nakshatraTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra2.progress }] : []),
     ],
     yoga: [
-      { name: yoga.name, number: yoga.number, startTime: '', endTime: yogaTransitionTime, progress: yoga.progress },
-      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: yogaTransitionTime, endTime: '', progress: yoga2.progress }] : []),
+      { name: yoga.name, number: yoga.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: yogaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga.progress },
+      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: yogaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga2.progress }] : []),
     ],
     karana: [
-      { name: karana.name, number: karana.number, startTime: '', endTime: '', progress: karana.progress },
-      ...(karana2 ? [{ name: karana2.name, number: karana2.number, startTime: '', endTime: '', progress: karana2.progress }] : []),
+      { name: karana.name, number: karana.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: karanaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: karana.progress },
+      ...(karana2 ? [{ name: karana2.name, number: karana2.number, startTime: karanaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: karana2.progress }] : []),
     ],
     vara,
     moonSign,
