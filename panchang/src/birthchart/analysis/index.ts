@@ -13,3 +13,6 @@ export type { PlanetaryAspect, AspectResult, AspectPlanetInput } from './aspects
 
 export { calculateShadBala } from './shadbala';
 export type { ShadBalaResult, ShadBalaPlanetInput } from './shadbala';
+
+export { detectYogas } from './yogas';
+export type { DetectedYoga, YogaResult } from './yogas';

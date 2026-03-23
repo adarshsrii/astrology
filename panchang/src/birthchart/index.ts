@@ -43,6 +43,9 @@ export type { ShadBalaResult, ShadBalaPlanetInput } from './analysis/shadbala';
 export { analyzeManglik, analyzeKaalSarp, analyzeGandaMoola, analyzeGandanta } from './analysis/dosha';
 export type { ManglikResult, KaalSarpResult, GandaMoolaResult, GandantaResult, GandantaPlanet } from './analysis/dosha';
 
+export { detectYogas } from './analysis/yogas';
+export type { DetectedYoga, YogaResult } from './analysis/yogas';
+
 // Dasha module
 export { calculateVimshottariDasha, DASHA_YEARS, DASHA_SEQUENCE, NAKSHATRA_LORDS } from './dasha';
 export type { DashaPeriod, VimshottariResult } from './dasha';
