@@ -49,6 +49,9 @@ const { calculateShodashvarga } = require('./dist/panchang/src/birthchart/divisi
 const { getNameSuggestions } = require('./dist/panchang/src/birthchart/recommendations/names');
 const { getRemedies } = require('./dist/panchang/src/birthchart/recommendations/remedies');
 
+// Transit (Gochar) — Daily Horoscope
+const { calculateDailyHoroscope, getDailyHoroscope } = require('./dist/panchang/src/transit/index');
+
 module.exports = {
   // Legacy
   calculateSunriseSunset,
@@ -97,4 +100,8 @@ module.exports = {
   // Recommendations
   getNameSuggestions,
   getRemedies,
+
+  // Transit — Daily Horoscope
+  calculateDailyHoroscope,
+  getDailyHoroscope,
 };

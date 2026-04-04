@@ -556,3 +556,13 @@ export type {
   LagnaInfo,
 } from './birthchart/index';
 export { ALL_GRAHAS } from './birthchart/index';
+
+// Transit (Gochar) — Daily Horoscope module
+export { calculateDailyHoroscope, getDailyHoroscope } from './transit/index';
+export type {
+  DailyHoroscope,
+  PlanetTransit,
+  LifeAreaPrediction,
+  TransitInterpretation,
+  GocharInput,
+} from './transit/index';
