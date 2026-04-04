@@ -24,3 +24,28 @@ export declare const RASHIS: Array<{
     lord: string;
     element: string;
 }>;
+export type Lang = 'en' | 'hi';
+export declare const TITHI_NAMES_HI: string[];
+export declare const NAKSHATRAS_HI: Array<{
+    name: string;
+    lord: string;
+    deity: string;
+}>;
+export declare const YOGA_NAMES_HI: string[];
+export declare const KARANA_NAMES_REPEATING_HI: string[];
+export declare const KARANA_NAMES_FIXED_HI: string[];
+export declare const RASHIS_HI: Array<{
+    name: string;
+    sanskritName: string;
+    lord: string;
+    element: string;
+}>;
+export declare const VARA_NAMES: string[];
+export declare const VARA_NAMES_HI: string[];
+export declare const MOON_PHASES_HI: Record<string, string>;
+export declare const PAKSHA_HI: Record<string, string>;
+export declare const AYANA_HI: Record<string, string>;
+export declare const RITU_HI: Record<string, {
+    vedic: string;
+    english: string;
+}>;

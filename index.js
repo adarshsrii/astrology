@@ -56,6 +56,11 @@ function calculatePanchang(date, latitude, longitude, timezone, locationName, la
 // Birth Chart module
 const birthchart = require('./panchang/src/birthchart/index');
 
+// Wrap calculateFullPanchang to accept lang parameter
+function calculateFullPanchangWithLang(date, latitude, longitude, timezone, lang = 'en') {
+  return calculateFullPanchang(date, latitude, longitude, timezone, lang);
+}
+
 module.exports = {
   // Re-export all birthchart functions (analysis, dasha, divisional, etc.)
   ...birthchart,
@@ -70,7 +75,7 @@ module.exports = {
   calculateMoonPosition,
   calculateNakshatras,
   calculatePanchang,
-  calculateFullPanchang,
+  calculateFullPanchang: calculateFullPanchangWithLang,
   calculateMonthlyPanchang,
   calculateTithi,
   calculateNakshatraV2,

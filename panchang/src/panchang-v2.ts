@@ -3,7 +3,21 @@ import { calculateNakshatra } from './core/nakshatra';
 import { calculateYoga } from './core/yoga';
 import { calculateKarana } from './core/karana';
 import { calculateRashi } from './core/rashi';
-import { normalizeAngle } from './core/constants';
+import {
+  normalizeAngle,
+  Lang,
+  TITHI_NAMES_HI,
+  NAKSHATRAS_HI,
+  YOGA_NAMES_HI,
+  KARANA_NAMES_REPEATING_HI,
+  KARANA_NAMES_FIXED_HI,
+  RASHIS_HI,
+  VARA_NAMES_HI,
+  MOON_PHASES_HI,
+  PAKSHA_HI,
+  AYANA_HI,
+  RITU_HI,
+} from './core/constants';
 import { PanchangResult, Location } from './types';
 import { calculateMuhurats } from './timings/muhurat';
 import { calculateKalams } from './timings/kalam';
@@ -98,6 +112,7 @@ export function calculateFullPanchang(
   latitude: number,
   longitude: number,
   timezone: string,
+  lang: Lang = 'en',
 ): PanchangResult {
   // Use noon local time as an initial reference for sunrise/sunset calculation.
   // After computing sunrise, we re-compute planetary positions at sunrise
@@ -346,9 +361,10 @@ export function calculateFullPanchang(
   // Use the date string to determine weekday (timezone-independent)
   const varaDateStr = typeof date === 'string' ? date : noonDate.toISOString().split('T')[0];
   const varaDate = new Date(varaDateStr + 'T12:00:00Z'); // Noon UTC — safe for any timezone
+  const varaDay = varaDate.getUTCDay();
   const vara = {
-    name: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDate.getUTCDay()],
-    number: varaDate.getUTCDay(),
+    name: lang === 'hi' ? VARA_NAMES_HI[varaDay] : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDay],
+    number: varaDay,
   };
 
   const diff = normalizeAngle(moonLon - sunLon);
@@ -384,6 +400,40 @@ export function calculateFullPanchang(
   // Dinamana / Ratrimana / Madhyahna
   const durations = (sunriseStr && sunsetStr) ? calculateDurations(sunriseStr, sunsetStr) : { dinamana: '', ratrimana: '', madhyahna: '' };
 
+  // ── Localization helpers ──────────────────────────────────────────────────
+  function locTithiName(name: string, idx: number): string {
+    if (lang !== 'hi') return name;
+    return TITHI_NAMES_HI[idx] ?? name;
+  }
+  function locNakName(n: { name: string; number: number; lord: string; deity: string }): { name: string; lord: string; deity: string } {
+    if (lang !== 'hi') return n;
+    const hi = NAKSHATRAS_HI[n.number - 1];
+    return hi ? { name: hi.name, lord: hi.lord, deity: hi.deity } : n;
+  }
+  function locYogaName(name: string, idx: number): string {
+    if (lang !== 'hi') return name;
+    return YOGA_NAMES_HI[idx - 1] ?? name;
+  }
+  function locKaranaName(name: string): string {
+    if (lang !== 'hi') return name;
+    // Check repeating karanas
+    const repIdx = ['Bava','Balava','Kaulava','Taitila','Garija','Vanija','Vishti'].indexOf(name);
+    if (repIdx >= 0) return KARANA_NAMES_REPEATING_HI[repIdx];
+    // Check fixed karanas
+    const fixIdx = ['Shakuni','Chatushpad','Naga','Kimstughna'].indexOf(name);
+    if (fixIdx >= 0) return KARANA_NAMES_FIXED_HI[fixIdx];
+    return name;
+  }
+  function locRashi(r: { name: string; lord: string; degree: number; number: number }): { name: string; lord: string; degree: number; number: number } {
+    if (lang !== 'hi') return r;
+    const hi = RASHIS_HI[r.number - 1];
+    return hi ? { ...r, name: hi.name, lord: hi.lord } : r;
+  }
+  function locMoonPhase(name: string): string {
+    if (lang !== 'hi') return name;
+    return MOON_PHASES_HI[name] ?? name;
+  }
+
   return {
     date: dateStr,
     location: { lat: latitude, lon: longitude, timezone },
@@ -392,31 +442,31 @@ export function calculateFullPanchang(
     moonrise: formatTimeHHMM(moonrise, timezone),
     moonset: formatTimeHHMM(moonset, timezone),
     tithi: [
-      { name: tithi.name, number: tithi.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: tithiTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi.progress },
-      ...(tithi2 ? [{ name: tithi2.name, number: tithi2.number, startTime: tithiTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi2.progress }] : []),
+      { name: locTithiName(tithi.name, tithi.tithiIndex - 1), number: tithi.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: tithiTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi.progress },
+      ...(tithi2 ? [{ name: locTithiName(tithi2.name, tithi2.tithiIndex - 1), number: tithi2.number, startTime: tithiTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: tithi2.progress }] : []),
     ],
     nakshatra: [
-      { name: nakshatra.name, number: nakshatra.number, pada: nakshatra.pada, lord: nakshatra.lord, deity: nakshatra.deity, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: nakshatraTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra.progress },
-      ...(nakshatra2 ? [{ name: nakshatra2.name, number: nakshatra2.number, pada: nakshatra2.pada, lord: nakshatra2.lord, deity: nakshatra2.deity, startTime: nakshatraTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra2.progress }] : []),
+      { ...locNakName(nakshatra), number: nakshatra.number, pada: nakshatra.pada, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: nakshatraTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra.progress },
+      ...(nakshatra2 ? [{ ...locNakName(nakshatra2), number: nakshatra2.number, pada: nakshatra2.pada, startTime: nakshatraTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: nakshatra2.progress }] : []),
     ],
     yoga: [
-      { name: yoga.name, number: yoga.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: yogaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga.progress },
-      ...(yoga2 ? [{ name: yoga2.name, number: yoga2.number, startTime: yogaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga2.progress }] : []),
+      { name: locYogaName(yoga.name, yoga.number), number: yoga.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: yogaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga.progress },
+      ...(yoga2 ? [{ name: locYogaName(yoga2.name, yoga2.number), number: yoga2.number, startTime: yogaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: yoga2.progress }] : []),
     ],
     karana: [
-      { name: karana.name, number: karana.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: karanaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: karana.progress },
-      ...(karana2 ? [{ name: karana2.name, number: karana2.number, startTime: karanaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: karana2.progress }] : []),
+      { name: locKaranaName(karana.name), number: karana.number, startTime: formatTransitionTime(sunrise ?? noonDate, timezone), endTime: karanaTransitionTime || formatTransitionTime(sunset ?? noonDate, timezone), progress: karana.progress },
+      ...(karana2 ? [{ name: locKaranaName(karana2.name), number: karana2.number, startTime: karanaTransitionTime, endTime: formatTransitionTime(sunset ?? noonDate, timezone), progress: karana2.progress }] : []),
     ],
     vara,
-    moonSign,
-    sunSign,
-    moonPhase: { name: getMoonPhaseName(tithi.tithiIndex - 1), illumination: moonIllumination },
-    paksha: tithi.paksha,
+    moonSign: locRashi(moonSign),
+    sunSign: locRashi(sunSign),
+    moonPhase: { name: locMoonPhase(getMoonPhaseName(tithi.tithiIndex - 1)), illumination: moonIllumination },
+    paksha: lang === 'hi' ? (PAKSHA_HI[tithi.paksha] ?? tithi.paksha) : tithi.paksha,
     auspiciousMuhurats,
     inauspiciousKalams,
-    sunNakshatra: { name: sunNak.name, number: sunNak.number, pada: sunNak.pada, lord: sunNak.lord, deity: sunNak.deity, startTime: '', endTime: '', progress: sunNak.progress },
-    ayana,
-    ritu,
+    sunNakshatra: { ...locNakName(sunNak), number: sunNak.number, pada: sunNak.pada, startTime: '', endTime: '', progress: sunNak.progress },
+    ayana: lang === 'hi' ? (AYANA_HI[ayana] ?? ayana) : ayana,
+    ritu: lang === 'hi' && RITU_HI[ritu.vedic] ? RITU_HI[ritu.vedic] : ritu,
     solarMonth,
     dinamana: durations.dinamana,
     ratrimana: durations.ratrimana,

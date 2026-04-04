@@ -52,13 +52,13 @@ export interface PanchangResult {
   moonSign: RashiInfo;
   sunSign: RashiInfo;
   moonPhase: { name: string; illumination: number };
-  paksha: 'Shukla' | 'Krishna';
+  paksha: string;
   auspiciousMuhurats: TimingEntry[];
   inauspiciousKalams: TimingEntry[];
 
   // Sun Movement
   sunNakshatra: NakshatraEntry;
-  ayana: 'Uttarayana' | 'Dakshinayana';
+  ayana: string;
   ritu: { vedic: string; english: string };
   solarMonth: string;
 
@@ -92,7 +92,7 @@ export interface DailySummary {
   sunset: string;         // "6:17 PM"
   tithi: {
     name: string;         // "Shukla Trayodashi"
-    paksha: 'Shukla' | 'Krishna';
+    paksha: string;
     progress: number;
   };
   nakshatra: {

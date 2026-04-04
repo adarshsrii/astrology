@@ -179,3 +179,179 @@ export const RASHIS: Array<{
   { name: 'Aquarius',    sanskritName: 'Kumbha',     lord: 'Saturn',  element: 'Air'   },
   { name: 'Pisces',      sanskritName: 'Meena',      lord: 'Jupiter', element: 'Water' },
 ];
+
+// ---------------------------------------------------------------------------
+// Hindi translations
+// ---------------------------------------------------------------------------
+
+export type Lang = 'en' | 'hi';
+
+export const TITHI_NAMES_HI: string[] = [
+  // शुक्ल पक्ष (1–15)
+  'शुक्ल प्रतिपदा',
+  'शुक्ल द्वितीया',
+  'शुक्ल तृतीया',
+  'शुक्ल चतुर्थी',
+  'शुक्ल पंचमी',
+  'शुक्ल षष्ठी',
+  'शुक्ल सप्तमी',
+  'शुक्ल अष्टमी',
+  'शुक्ल नवमी',
+  'शुक्ल दशमी',
+  'शुक्ल एकादशी',
+  'शुक्ल द्वादशी',
+  'शुक्ल त्रयोदशी',
+  'शुक्ल चतुर्दशी',
+  'पूर्णिमा',
+  // कृष्ण पक्ष (1–15)
+  'कृष्ण प्रतिपदा',
+  'कृष्ण द्वितीया',
+  'कृष्ण तृतीया',
+  'कृष्ण चतुर्थी',
+  'कृष्ण पंचमी',
+  'कृष्ण षष्ठी',
+  'कृष्ण सप्तमी',
+  'कृष्ण अष्टमी',
+  'कृष्ण नवमी',
+  'कृष्ण दशमी',
+  'कृष्ण एकादशी',
+  'कृष्ण द्वादशी',
+  'कृष्ण त्रयोदशी',
+  'कृष्ण चतुर्दशी',
+  'अमावस्या',
+];
+
+export const NAKSHATRAS_HI: Array<{ name: string; lord: string; deity: string }> = [
+  { name: 'अश्विनी',       lord: 'केतु',    deity: 'अश्विनी कुमार' },
+  { name: 'भरणी',          lord: 'शुक्र',   deity: 'यम' },
+  { name: 'कृत्तिका',      lord: 'सूर्य',   deity: 'अग्नि' },
+  { name: 'रोहिणी',        lord: 'चंद्र',   deity: 'ब्रह्मा' },
+  { name: 'मृगशिरा',       lord: 'मंगल',   deity: 'सोम' },
+  { name: 'आर्द्रा',        lord: 'राहु',    deity: 'रुद्र' },
+  { name: 'पुनर्वसु',      lord: 'गुरु',    deity: 'अदिति' },
+  { name: 'पुष्य',         lord: 'शनि',    deity: 'बृहस्पति' },
+  { name: 'आश्लेषा',       lord: 'बुध',    deity: 'नाग' },
+  { name: 'मघा',           lord: 'केतु',    deity: 'पितर' },
+  { name: 'पूर्वाफाल्गुनी',  lord: 'शुक्र',   deity: 'भग' },
+  { name: 'उत्तराफाल्गुनी', lord: 'सूर्य',   deity: 'अर्यमा' },
+  { name: 'हस्त',          lord: 'चंद्र',   deity: 'सवितर' },
+  { name: 'चित्रा',         lord: 'मंगल',   deity: 'विश्वकर्मा' },
+  { name: 'स्वाति',         lord: 'राहु',    deity: 'वायु' },
+  { name: 'विशाखा',        lord: 'गुरु',    deity: 'इंद्राग्नि' },
+  { name: 'अनुराधा',       lord: 'शनि',    deity: 'मित्र' },
+  { name: 'ज्येष्ठा',       lord: 'बुध',    deity: 'इंद्र' },
+  { name: 'मूल',           lord: 'केतु',    deity: 'निर्ऋति' },
+  { name: 'पूर्वाषाढ़ा',     lord: 'शुक्र',   deity: 'अपः' },
+  { name: 'उत्तराषाढ़ा',    lord: 'सूर्य',   deity: 'विश्वेदेव' },
+  { name: 'श्रवण',         lord: 'चंद्र',   deity: 'विष्णु' },
+  { name: 'धनिष्ठा',       lord: 'मंगल',   deity: 'वसु' },
+  { name: 'शतभिषा',       lord: 'राहु',    deity: 'वरुण' },
+  { name: 'पूर्वाभाद्रपद',   lord: 'गुरु',    deity: 'अजैकपाद' },
+  { name: 'उत्तराभाद्रपद',  lord: 'शनि',    deity: 'अहिर्बुध्न्य' },
+  { name: 'रेवती',         lord: 'बुध',    deity: 'पूषन' },
+];
+
+export const YOGA_NAMES_HI: string[] = [
+  'विष्कुम्भ',
+  'प्रीति',
+  'आयुष्मान',
+  'सौभाग्य',
+  'शोभन',
+  'अतिगण्ड',
+  'सुकर्मा',
+  'धृति',
+  'शूल',
+  'गण्ड',
+  'वृद्धि',
+  'ध्रुव',
+  'व्याघात',
+  'हर्षण',
+  'वज्र',
+  'सिद्धि',
+  'व्यतीपात',
+  'वरीयान',
+  'परिघ',
+  'शिव',
+  'सिद्ध',
+  'साध्य',
+  'शुभ',
+  'शुक्ल',
+  'ब्रह्म',
+  'इंद्र',
+  'वैधृति',
+];
+
+export const KARANA_NAMES_REPEATING_HI: string[] = [
+  'बव',
+  'बालव',
+  'कौलव',
+  'तैतिल',
+  'गरिज',
+  'वणिज',
+  'विष्टि',
+];
+
+export const KARANA_NAMES_FIXED_HI: string[] = [
+  'शकुनि',
+  'चतुष्पद',
+  'नाग',
+  'किंस्तुघ्न',
+];
+
+export const RASHIS_HI: Array<{
+  name: string;
+  sanskritName: string;
+  lord: string;
+  element: string;
+}> = [
+  { name: 'मेष',       sanskritName: 'मेष',      lord: 'मंगल',   element: 'अग्नि' },
+  { name: 'वृषभ',      sanskritName: 'वृषभ',     lord: 'शुक्र',   element: 'पृथ्वी' },
+  { name: 'मिथुन',     sanskritName: 'मिथुन',    lord: 'बुध',    element: 'वायु' },
+  { name: 'कर्क',       sanskritName: 'कर्क',      lord: 'चंद्र',   element: 'जल' },
+  { name: 'सिंह',       sanskritName: 'सिंह',      lord: 'सूर्य',   element: 'अग्नि' },
+  { name: 'कन्या',      sanskritName: 'कन्या',     lord: 'बुध',    element: 'पृथ्वी' },
+  { name: 'तुला',       sanskritName: 'तुला',      lord: 'शुक्र',   element: 'वायु' },
+  { name: 'वृश्चिक',    sanskritName: 'वृश्चिक',   lord: 'मंगल',   element: 'जल' },
+  { name: 'धनु',        sanskritName: 'धनु',      lord: 'गुरु',    element: 'अग्नि' },
+  { name: 'मकर',        sanskritName: 'मकर',      lord: 'शनि',    element: 'पृथ्वी' },
+  { name: 'कुंभ',       sanskritName: 'कुंभ',      lord: 'शनि',    element: 'वायु' },
+  { name: 'मीन',        sanskritName: 'मीन',      lord: 'गुरु',    element: 'जल' },
+];
+
+export const VARA_NAMES: string[] = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+];
+
+export const VARA_NAMES_HI: string[] = [
+  'रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार',
+];
+
+export const MOON_PHASES_HI: Record<string, string> = {
+  'New Moon': 'अमावस्या',
+  'Waxing Crescent': 'शुक्ल द्वितीया चंद्र',
+  'First Quarter': 'शुक्ल अष्टमी चंद्र',
+  'Waxing Gibbous': 'शुक्ल एकादशी चंद्र',
+  'Full Moon': 'पूर्णिमा',
+  'Waning Gibbous': 'कृष्ण तृतीया चंद्र',
+  'Last Quarter': 'कृष्ण अष्टमी चंद्र',
+  'Waning Crescent': 'कृष्ण एकादशी चंद्र',
+};
+
+export const PAKSHA_HI: Record<string, string> = {
+  'Shukla': 'शुक्ल',
+  'Krishna': 'कृष्ण',
+};
+
+export const AYANA_HI: Record<string, string> = {
+  'Uttarayana': 'उत्तरायण',
+  'Dakshinayana': 'दक्षिणायन',
+};
+
+export const RITU_HI: Record<string, { vedic: string; english: string }> = {
+  'Vasanta': { vedic: 'वसंत', english: 'बसंत' },
+  'Grishma': { vedic: 'ग्रीष्म', english: 'गर्मी' },
+  'Varsha': { vedic: 'वर्षा', english: 'बरसात' },
+  'Sharad': { vedic: 'शरद', english: 'पतझड़' },
+  'Hemanta': { vedic: 'हेमंत', english: 'शिशिर पूर्व' },
+  'Shishira': { vedic: 'शिशिर', english: 'सर्दी' },
+};

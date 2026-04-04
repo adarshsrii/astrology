@@ -54,11 +54,11 @@ export interface PanchangResult {
         name: string;
         illumination: number;
     };
-    paksha: 'Shukla' | 'Krishna';
+    paksha: string;
     auspiciousMuhurats: TimingEntry[];
     inauspiciousKalams: TimingEntry[];
     sunNakshatra: NakshatraEntry;
-    ayana: 'Uttarayana' | 'Dakshinayana';
+    ayana: string;
     ritu: {
         vedic: string;
         english: string;
@@ -88,7 +88,7 @@ export interface DailySummary {
     sunset: string;
     tithi: {
         name: string;
-        paksha: 'Shukla' | 'Krishna';
+        paksha: string;
         progress: number;
     };
     nakshatra: {

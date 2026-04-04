@@ -23,9 +23,9 @@ export function calculatePanchang(
     const latitude = location;
     const longitude = longitudeOrTimezone as number;
     const tz = timezone || 'UTC';
-    return getPanchang(date, latitude, longitude, tz);
+    return getPanchang(date, latitude, longitude, tz, lang);
   } else {
     const tz = (longitudeOrTimezone as string) || timezone || 'UTC';
-    return getPanchang(date, location.latitude, location.longitude, tz);
+    return getPanchang(date, location.latitude, location.longitude, tz, lang);
   }
 }

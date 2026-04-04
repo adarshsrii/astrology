@@ -7,13 +7,15 @@ import { PanchangOutput } from '../index';
  * @param latitude Latitude in degrees.
  * @param longitude Longitude in degrees.
  * @param timezone Timezone identifier.
+ * @param lang Language code ('en' or 'hi').
  * @returns Panchang output.
  */
 export function getPanchang(
   date: Date,
   latitude: number,
   longitude: number,
-  timezone: string
+  timezone: string,
+  lang: 'en' | 'hi' = 'en'
 ): PanchangOutput {
   const calculator = new PanchangCalculator();
   try {
