@@ -46,6 +46,9 @@ export type { ManglikResult, KaalSarpResult, GandaMoolaResult, GandantaResult, G
 export { detectYogas } from './analysis/yogas';
 export type { DetectedYoga, YogaResult } from './analysis/yogas';
 
+export { calculateAshtakootMilan } from './analysis/ashtakoot';
+export type { MatchInput, GunaScore, AshtakootResult } from './analysis/ashtakoot';
+
 // Dasha module
 export { calculateVimshottariDasha, DASHA_YEARS, DASHA_SEQUENCE, NAKSHATRA_LORDS } from './dasha';
 export type { DashaPeriod, VimshottariResult } from './dasha';

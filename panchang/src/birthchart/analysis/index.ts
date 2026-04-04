@@ -16,3 +16,6 @@ export type { ShadBalaResult, ShadBalaPlanetInput } from './shadbala';
 
 export { detectYogas } from './yogas';
 export type { DetectedYoga, YogaResult } from './yogas';
+
+export { calculateAshtakootMilan } from './ashtakoot';
+export type { MatchInput, GunaScore, AshtakootResult } from './ashtakoot';
