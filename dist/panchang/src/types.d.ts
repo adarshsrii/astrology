@@ -70,6 +70,8 @@ export interface PanchangResult {
     samvatsar: string;
     vikramSamvat?: number;
     shakaSamvat?: number;
+    hinduMonth?: string;
+    hinduMonthAmanta?: string;
 }
 export interface CelestialPosition {
     longitude: number;

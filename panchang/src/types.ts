@@ -71,6 +71,8 @@ export interface PanchangResult {
   samvatsar: string;
   vikramSamvat?: number;
   shakaSamvat?: number;
+  hinduMonth?: string;        // Purnimant lunar month (Chaitra, Vaisakha, etc.)
+  hinduMonthAmanta?: string;  // Amanta lunar month
 }
 
 export interface CelestialPosition {

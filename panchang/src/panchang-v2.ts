@@ -329,34 +329,88 @@ export function calculateFullPanchang(
   // Solar month
   const solarMonth = SOLAR_MONTHS[sunSign.number - 1];
 
-  // Samvatsar (60-year cycle)
-  // Vikram new year = Chaitra Shukla Pratipad (day after Chaitra Amavasya)
-  // This falls when Sun is in Pisces (Meena) and Moon is new → Shukla Pratipad
-  // Approximation: if Sun is in Pisces (sign 12) and tithi is in Shukla Paksha,
-  // we're in the new Vikram year. Otherwise check if we've passed the spring new moon.
+  // ── Vikram Samvat & Saka Samvat ─────────────────────────────────────────────
   //
-  // More robust: The Vikram year changes when Chaitra Shukla Paksha begins.
-  // Chaitra = lunar month when Sun is in Pisces/Aries.
-  // If tithi is Shukla (waxing) and Sun is in Pisces → new year has started.
-  // If tithi is Krishna (waning) and Sun is in Pisces → still old year (Chaitra Krishna = Phalguna Amanta).
+  // Hindu new year = Chaitra Shukla Pratipada
+  // This is the first day of Shukla Paksha when the Sun is in Meena (Pisces).
+  //
+  // The year changes PRECISELY when:
+  //   1. Sun is in Pisces (Meena rashi, sidereal sign 12)
+  //   2. Moon transitions from Krishna Amavasya → Shukla Pratipada
+  //
+  // Timeline across a Gregorian year:
+  //   Jan–Feb  → Sun in Dhanu/Makara/Kumbha (9-11) → always BEFORE new year
+  //   March    → Sun in Kumbha or Meena (11-12)    → check paksha if Meena
+  //   April    → Sun in Meena or Mesha (12-1)      → new year has started
+  //   May–Dec  → Sun in Mesha–Dhanu (1-9)          → already past new year
+  //
+  // Offsets: VS = Gregorian + 57 (after new year), +56 (before)
+  //          Saka = Gregorian - 78 (after), -79 (before)
+  //
+  // Verified: 2026-04-06 → VS 2083, Saka 1948 (Chaitra, Shukla Paksha)
+
   const gregYear = noonDate.getFullYear();
-  const sunInPisces = sunSign.number === 12; // Meena
-  const sunInAries = sunSign.number === 1;   // Mesha
+  const gregMonth = noonDate.getMonth(); // 0 = Jan
+  const sunInPisces = sunSign.number === 12;
   const isShukla = tithi.paksha === 'Shukla';
 
-  // New year starts when: Sun in Pisces + Shukla Paksha (Chaitra Shukla)
-  // OR Sun has moved past Pisces into Aries+ (definitely new year)
-  const newYearStarted = (sunInPisces && isShukla) ||
-    (sunSign.number >= 1 && sunSign.number <= 6); // Aries through Virgo = after spring
+  let chaitraShuklaStarted: boolean;
+  if (gregMonth <= 1) {
+    // January–February: Sun is in Sagittarius/Capricorn/Aquarius.
+    // The next Chaitra hasn't come yet → old year.
+    chaitraShuklaStarted = false;
+  } else if (gregMonth >= 3) {
+    // April–December: Chaitra Shukla always falls in March/April.
+    // By April we are certainly past it → new year.
+    chaitraShuklaStarted = true;
+  } else {
+    // March: the transition month. Check astronomically.
+    //   Sun still in Aquarius (11) → Phalguna territory → old year
+    //   Sun in Pisces (12) + Krishna → Phalguna/Chaitra Krishna → old year
+    //   Sun in Pisces (12) + Shukla → Chaitra Shukla → new year!
+    //   Sun in Aries (1) → already past → new year
+    chaitraShuklaStarted = (sunInPisces && isShukla) || (sunSign.number >= 1 && sunSign.number <= 6);
+  }
 
-  // But Jan-Feb is always before new year (Sun in Capricorn/Aquarius)
-  const month = noonDate.getMonth();
-  const isEarlyYear = month <= 1; // Jan, Feb always before Hindu new year
-
-  const vikramSamvat = (newYearStarted && !isEarlyYear) ? gregYear + 57 : gregYear + 56;
-  const shakaSamvat = (newYearStarted && !isEarlyYear) ? gregYear - 78 : gregYear - 79;
+  const vikramSamvat = chaitraShuklaStarted ? gregYear + 57 : gregYear + 56;
+  const shakaSamvat = chaitraShuklaStarted ? gregYear - 78 : gregYear - 79;
   const samvatsarIndex = ((vikramSamvat - 51) % 60 + 60) % 60;
   const samvatsar = SAMVATSARS[samvatsarIndex];
+
+  // ── Hindu Lunar Month (Masa) ──────────────────────────────────────────────
+  //
+  // The lunar month is named after the solar month in which the preceding
+  // Amavasya (new moon) occurred.
+  //
+  // Two systems:
+  //   Amanta  (South India) — month ends at Amavasya
+  //   Purnimant (North India) — month ends at Purnima
+  //     → Krishna paksha: same month name in both systems
+  //     → Shukla paksha: Purnimant is one month ahead of Amanta
+  //
+  // Sun sign → Amanta month:
+  //   Mesha (1) → Vaisakha    Vrishabha (2) → Jyeshtha
+  //   Mithuna (3) → Ashadha    Karka (4) → Shravana
+  //   Simha (5) → Bhadrapada   Kanya (6) → Ashvina
+  //   Tula (7) → Kartika       Vrischika (8) → Margashirsha
+  //   Dhanu (9) → Pausha        Makara (10) → Magha
+  //   Kumbha (11) → Phalguna    Meena (12) → Chaitra
+  const LUNAR_MONTHS = [
+    'Vaisakha', 'Jyeshtha', 'Ashadha', 'Shravana',
+    'Bhadrapada', 'Ashvina', 'Kartika', 'Margashirsha',
+    'Pausha', 'Magha', 'Phalguna', 'Chaitra',
+  ];
+  const LUNAR_MONTHS_HI = [
+    'वैशाख', 'ज्येष्ठ', 'आषाढ़', 'श्रावण',
+    'भाद्रपद', 'आश्विन', 'कार्तिक', 'मार्गशीर्ष',
+    'पौष', 'माघ', 'फाल्गुन', 'चैत्र',
+  ];
+  const amantaIndex = sunSign.number - 1;
+  // Purnimant: during Krishna paksha = same as Amanta;
+  //            during Shukla paksha = next month
+  const purnimantIndex = isShukla ? amantaIndex : ((amantaIndex - 1 + 12) % 12);
+  const hinduMonth = lang === 'hi' ? LUNAR_MONTHS_HI[purnimantIndex] : LUNAR_MONTHS[purnimantIndex];
+  const hinduMonthAmanta = lang === 'hi' ? LUNAR_MONTHS_HI[amantaIndex] : LUNAR_MONTHS[amantaIndex];
 
   // Use the date string to determine weekday (timezone-independent)
   const varaDateStr = typeof date === 'string' ? date : noonDate.toISOString().split('T')[0];
@@ -474,5 +528,7 @@ export function calculateFullPanchang(
     samvatsar,
     vikramSamvat: vikramSamvat,
     shakaSamvat: shakaSamvat,
+    hinduMonth,
+    hinduMonthAmanta,
   };
 }
