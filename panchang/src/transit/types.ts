@@ -91,3 +91,38 @@ export interface TransitRule {
   /** Vedha pairs: key = favorable house, value = vedha (obstructing) house */
   vedhaPairs: Record<number, number>;
 }
+
+export type SadeSatiPhase = 'rising' | 'peak' | 'setting';
+
+export interface SadeSatiPhasePeriod {
+  phase: SadeSatiPhase;
+  houseFromMoon: number;
+  startDate: string;
+  endDate: string;
+  saturnSign: string;
+  saturnSignHi: string;
+  saturnSignNumber: number;
+}
+
+export interface SadeSatiCycle {
+  startDate: string;
+  endDate: string;
+  activeOnReferenceDate: boolean;
+  phases: SadeSatiPhasePeriod[];
+}
+
+export interface SadeSatiResult {
+  referenceDate: string;
+  moonSign: string;
+  moonSignHi: string;
+  moonSignNumber: number;
+  currentSaturnSign: string;
+  currentSaturnSignHi: string;
+  currentSaturnSignNumber: number;
+  currentHouseFromMoon: number;
+  isCurrentlyInSadeSati: boolean;
+  currentPhase?: SadeSatiPhase;
+  currentCycle: SadeSatiCycle | null;
+  previousCycle: SadeSatiCycle | null;
+  nextCycle: SadeSatiCycle | null;
+}

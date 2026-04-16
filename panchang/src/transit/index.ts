@@ -22,6 +22,8 @@
 
 export { calculateDailyHoroscope } from './gochar';
 export type { GocharInput } from './gochar';
+export { calculateSadeSatiPeriod } from './sadeSati';
+export type { SadeSatiInput } from './sadeSati';
 
 export type {
   DailyHoroscope,
@@ -31,6 +33,10 @@ export type {
   TransitEffect,
   LifeArea,
   TransitRule,
+  SadeSatiPhase,
+  SadeSatiPhasePeriod,
+  SadeSatiCycle,
+  SadeSatiResult,
 } from './types';
 
 export {

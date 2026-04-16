@@ -57,7 +57,7 @@ function calculatePanchang(date, latitude, longitude, timezone, locationName, la
 const birthchart = require('./panchang/src/birthchart/index');
 
 // Transit (Gochar) — Daily Horoscope module
-const { calculateDailyHoroscope, getDailyHoroscope } = require('./panchang/src/transit/index');
+const { calculateDailyHoroscope, getDailyHoroscope, calculateSadeSatiPeriod } = require('./panchang/src/transit/index');
 
 // Wrap calculateFullPanchang to accept lang parameter
 function calculateFullPanchangWithLang(date, latitude, longitude, timezone, lang = 'en') {
@@ -87,4 +87,5 @@ module.exports = {
   calculateRashi,
   calculateDailyHoroscope,
   getDailyHoroscope,
+  calculateSadeSatiPeriod,
 };

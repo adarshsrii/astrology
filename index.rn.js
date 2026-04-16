@@ -50,7 +50,7 @@ const { getNameSuggestions } = require('./dist/panchang/src/birthchart/recommend
 const { getRemedies } = require('./dist/panchang/src/birthchart/recommendations/remedies');
 
 // Transit (Gochar) — Daily Horoscope
-const { calculateDailyHoroscope, getDailyHoroscope } = require('./dist/panchang/src/transit/index');
+const { calculateDailyHoroscope, getDailyHoroscope, calculateSadeSatiPeriod } = require('./dist/panchang/src/transit/index');
 
 module.exports = {
   // Legacy
@@ -104,4 +104,5 @@ module.exports = {
   // Transit — Daily Horoscope
   calculateDailyHoroscope,
   getDailyHoroscope,
+  calculateSadeSatiPeriod,
 };
