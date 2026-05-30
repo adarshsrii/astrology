@@ -36,6 +36,7 @@ const { calculateAspects } = require('./dist/panchang/src/birthchart/analysis/as
 const { calculateShadBala } = require('./dist/panchang/src/birthchart/analysis/shadbala');
 const { analyzeManglik, analyzeKaalSarp, analyzeGandaMoola, analyzeGandanta } = require('./dist/panchang/src/birthchart/analysis/dosha');
 const { detectYogas } = require('./dist/panchang/src/birthchart/analysis/yogas');
+const { calculateAshtakootMilan } = require('./dist/panchang/src/birthchart/analysis/ashtakoot');
 
 // Dasha
 const { calculateVimshottariDasha } = require('./dist/panchang/src/birthchart/dasha/vimshottari');
@@ -88,6 +89,7 @@ module.exports = {
   analyzeGandaMoola,
   analyzeGandanta,
   detectYogas,
+  calculateAshtakootMilan,
 
   // Dasha
   calculateVimshottariDasha,
