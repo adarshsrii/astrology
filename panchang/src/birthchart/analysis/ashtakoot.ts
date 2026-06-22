@@ -143,16 +143,29 @@ const NAKSHATRA_YONI: number[] = [
 ];
 
 /**
- * Yoni enemy pairs — these pairs are hostile (0 points)
+ * Yoni Maitri matrix — full 14×14 compatibility table (points 0–4).
+ * Rows/cols indexed by yoni animal (0=Horse … 13=Lion, see NAKSHATRA_YONI).
+ *   4 = same yoni, 3 = friendly, 2 = neutral, 1 = unfriendly, 0 = mortal enemy.
+ * Symmetric; the diagonal is 4 and the seven 0-cells are the classical mortal
+ * enemy pairs (Horse–Buffalo, Elephant–Lion, Sheep–Monkey, Serpent–Mongoose,
+ * Dog–Deer, Cat–Rat, Cow–Tiger). This is the standard Yoni Kuta table and
+ * replaces the earlier flat "2 for everything that isn't same/enemy".
  */
-const YONI_ENEMIES: [number, number][] = [
-  [0, 8],   // Horse - Buffalo
-  [1, 13],  // Elephant - Lion
-  [2, 11],  // Sheep - Monkey
-  [3, 12],  // Serpent - Mongoose
-  [4, 10],  // Dog - Deer
-  [5, 6],   // Cat - Rat
-  [7, 9],   // Cow - Tiger
+const YONI_MATRIX: number[][] = [
+  /* Horse    */ [4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 3, 3, 2, 1],
+  /* Elephant */ [2, 4, 3, 3, 2, 2, 2, 2, 3, 1, 2, 3, 2, 0],
+  /* Sheep    */ [2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 2],
+  /* Serpent  */ [3, 3, 2, 4, 2, 1, 1, 1, 1, 2, 2, 2, 0, 2],
+  /* Dog      */ [2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 0, 2, 1, 1],
+  /* Cat      */ [2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 2, 2, 1],
+  /* Rat      */ [2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 2, 1],
+  /* Cow      */ [1, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 2, 2, 1],
+  /* Buffalo  */ [0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 1],
+  /* Tiger    */ [1, 1, 1, 2, 1, 1, 2, 0, 1, 4, 2, 1, 2, 2],
+  /* Deer     */ [3, 2, 2, 2, 0, 3, 2, 3, 2, 2, 4, 2, 2, 1],
+  /* Monkey   */ [3, 3, 0, 2, 2, 2, 2, 2, 2, 1, 2, 4, 3, 2],
+  /* Mongoose */ [2, 2, 3, 0, 1, 2, 2, 2, 2, 2, 2, 3, 4, 2],
+  /* Lion     */ [1, 0, 2, 2, 1, 1, 1, 1, 1, 2, 1, 2, 2, 4],
 ];
 
 /**
@@ -272,18 +285,7 @@ function calcTara(groom: MatchInput, bride: MatchInput): number {
 function calcYoni(groom: MatchInput, bride: MatchInput): number {
   const gy = NAKSHATRA_YONI[groom.nakshatraNumber - 1];
   const by = NAKSHATRA_YONI[bride.nakshatraNumber - 1];
-
-  // Same yoni
-  if (gy === by) return 4;
-
-  // Check enemy pairs
-  for (const [a, b] of YONI_ENEMIES) {
-    if ((gy === a && by === b) || (gy === b && by === a)) return 0;
-  }
-
-  // Friendly = 3, Neutral = 2, Unfriendly = 1
-  // Simplified: same species family → 3, otherwise 2
-  return 2;
+  return YONI_MATRIX[gy][by];
 }
 
 function calcGrahaMaitri(groom: MatchInput, bride: MatchInput): number {
