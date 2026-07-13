@@ -3,7 +3,7 @@
  * Birth Chart (Kundli) Module — Public API
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPlanetRemedy = exports.getRemedies = exports.NAKSHATRA_SYLLABLES = exports.getNameSuggestions = exports.calculateShodashvarga = exports.getChartInfo = exports.SHODASHVARGA_CHARTS = exports.calculateDivisionalChart = exports.NAKSHATRA_LORDS = exports.DASHA_SEQUENCE = exports.DASHA_YEARS = exports.calculateVimshottariDasha = exports.analyzeGandanta = exports.analyzeGandaMoola = exports.analyzeKaalSarp = exports.analyzeManglik = exports.calculateShadBala = exports.calculateAspects = exports.NATURAL_FRIENDSHIPS = exports.calculateCompoundFriendships = exports.calculateTemporalFriendships = exports.calculateFriendships = exports.calculateTattvaBalance = exports.generateChartLayouts = exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = exports.getDignitySymbol = exports.determineCombustion = exports.determineDignity = exports.ALL_GRAHAS = exports.calculateBirthChart = void 0;
+exports.getPlanetRemedy = exports.getRemedies = exports.NAKSHATRA_SYLLABLES = exports.getNameSuggestions = exports.calculateShodashvarga = exports.getChartInfo = exports.SHODASHVARGA_CHARTS = exports.calculateDivisionalChart = exports.NAKSHATRA_LORDS = exports.DASHA_SEQUENCE = exports.DASHA_YEARS = exports.calculateVimshottariDasha = exports.calculateAshtakootMilan = exports.detectYogas = exports.analyzeGandanta = exports.analyzeGandaMoola = exports.analyzeKaalSarp = exports.analyzeManglik = exports.calculateShadBala = exports.calculateAspects = exports.NATURAL_FRIENDSHIPS = exports.calculateCompoundFriendships = exports.calculateTemporalFriendships = exports.calculateFriendships = exports.calculateTattvaBalance = exports.generateChartLayouts = exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = exports.getDignitySymbol = exports.determineCombustion = exports.determineDignity = exports.ALL_GRAHAS = exports.calculateBirthChart = void 0;
 // Main function
 var birthchart_1 = require("./birthchart");
 Object.defineProperty(exports, "calculateBirthChart", { enumerable: true, get: function () { return birthchart_1.calculateBirthChart; } });
@@ -37,6 +37,10 @@ Object.defineProperty(exports, "analyzeManglik", { enumerable: true, get: functi
 Object.defineProperty(exports, "analyzeKaalSarp", { enumerable: true, get: function () { return dosha_1.analyzeKaalSarp; } });
 Object.defineProperty(exports, "analyzeGandaMoola", { enumerable: true, get: function () { return dosha_1.analyzeGandaMoola; } });
 Object.defineProperty(exports, "analyzeGandanta", { enumerable: true, get: function () { return dosha_1.analyzeGandanta; } });
+var yogas_1 = require("./analysis/yogas");
+Object.defineProperty(exports, "detectYogas", { enumerable: true, get: function () { return yogas_1.detectYogas; } });
+var ashtakoot_1 = require("./analysis/ashtakoot");
+Object.defineProperty(exports, "calculateAshtakootMilan", { enumerable: true, get: function () { return ashtakoot_1.calculateAshtakootMilan; } });
 // Dasha module
 var dasha_1 = require("./dasha");
 Object.defineProperty(exports, "calculateVimshottariDasha", { enumerable: true, get: function () { return dasha_1.calculateVimshottariDasha; } });
