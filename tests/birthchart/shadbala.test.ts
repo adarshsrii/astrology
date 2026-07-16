@@ -233,6 +233,32 @@ describe('isStrong', () => {
   });
 });
 
+// ── Regression: thresholds must be reachable on this engine's scale ─────────
+
+describe('Required thresholds are calibrated to the simplified scale', () => {
+  test('an ordinary chart is not all-weak', () => {
+    const planets = [
+      makePlanet({ name: 'Sun', signNumber: 4, degreeInSign: 12, house: 2, speed: 0.95 }),
+      makePlanet({ name: 'Moon', signNumber: 8, degreeInSign: 25, house: 6, speed: 13 }),
+      makePlanet({ name: 'Mars', signNumber: 1, degreeInSign: 5, house: 11, speed: 0.6, dignity: 'own_sign' }),
+      makePlanet({ name: 'Mercury', signNumber: 5, degreeInSign: 2, house: 3, retrograde: true, speed: -0.2 }),
+      makePlanet({ name: 'Jupiter', signNumber: 3, degreeInSign: 18, house: 1, speed: 0.2, dignity: 'enemy' }),
+      makePlanet({ name: 'Venus', signNumber: 5, degreeInSign: 28, house: 3, speed: 1.2 }),
+      makePlanet({ name: 'Saturn', signNumber: 12, degreeInSign: 9, house: 10, speed: 0.1 }),
+      makePlanet({ name: 'Rahu', signNumber: 11, degreeInSign: 3, house: 9, retrograde: true, speed: -0.05 }),
+      makePlanet({ name: 'Ketu', signNumber: 5, degreeInSign: 3, house: 3, retrograde: true, speed: -0.05 }),
+    ];
+    const results = calculateShadBala(planets, 3, 14);
+    expect(results.some((r) => r.isStrong)).toBe(true);
+    expect(results.some((r) => !r.isStrong)).toBe(true);
+  });
+
+  test('every required threshold is below the max achievable total (~400)', () => {
+    const results = calculateShadBala([makePlanet({ name: 'Mercury' })], 1);
+    expect(results[0].required).toBeLessThan(400);
+  });
+});
+
 // ── Chesta Bala ─────────────────────────────────────────────────────────────
 
 describe('Chesta Bala', () => {

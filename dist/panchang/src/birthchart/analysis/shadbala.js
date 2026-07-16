@@ -32,16 +32,23 @@ const NAISARGIKA_BALA = {
     Ketu: 8,
 };
 // ── Required minimums (Ishta Phala thresholds) ──────────────────────────────
+//
+// Classical virupa requirements (Sun 390, Moon 360, Mars 300, Mercury 420,
+// Jupiter 390, Venus 330, Saturn 300) assume the full Shadbala scale where
+// totals run ~400-700 virupas. This simplified implementation maxes out at
+// ~400 (sthana 100 + five components x 60), so those thresholds made every
+// planet read "weak" (Mercury's 420 was literally unreachable). Thresholds
+// below keep the classical proportions, scaled x0.55 to this engine's range.
 const REQUIRED_STRENGTH = {
-    Sun: 390,
-    Moon: 360,
-    Mars: 300,
-    Mercury: 420,
-    Jupiter: 390,
-    Venus: 330,
-    Saturn: 300,
-    Rahu: 250,
-    Ketu: 250,
+    Sun: 215,
+    Moon: 200,
+    Mars: 165,
+    Mercury: 230,
+    Jupiter: 215,
+    Venus: 180,
+    Saturn: 165,
+    Rahu: 140,
+    Ketu: 140,
 };
 // ── Dig Bala: strongest house for each planet ────────────────────────────────
 const DIG_BALA_STRONGEST_HOUSE = {
