@@ -1,0 +1,13 @@
+const A=require('/Users/saurabh/Work/pocket-pandit/astrology-insights/index.js');const fs=require('fs');
+const birth={date:'1993-10-27',time:'00:08',latitude:26.66,longitude:87.28,timezone:'Asia/Kathmandu'};
+const res=A.calculateBirthChart(birth);
+const plist=Array.isArray(res.planets)?res.planets:Object.values(res.planets);
+const ABBR={Sun:'Su',Moon:'Mo',Mars:'Ma',Mercury:'Me',Jupiter:'Ju',Venus:'Ve',Saturn:'Sa',Rahu:'Ra',Ketu:'Ke'};
+const sn=s=>({Aries:1,Taurus:2,Gemini:3,Cancer:4,Leo:5,Virgo:6,Libra:7,Scorpio:8,Sagittarius:9,Capricorn:10,Aquarius:11,Pisces:12})[s];
+const houses=(res.houses||[]).map(h=>({num:h.houseNumber||h.number,signNum:sn(h.signName||h.sign),signName:h.signName||h.sign,planets:(h.planets||[]).map(x=>ABBR[x.name||x]||x.name||x)}));
+const planets=plist.map(p=>({name:p.name,abbr:ABBR[p.name],sign:p.signName||p.sign,signNum:sn(p.signName||p.sign),nak:p.nakshatra,retro:!!p.retrograde,dignity:p.dignity||''}));
+const m=plist.find(p=>p.name==='Moon');
+const d=A.calculateVimshottariDasha(new Date('1993-10-26T18:23:00Z'),m.nakshatra,(m.longitude%13.3333333),2);
+const timeline=d.mahaDashas.map(p=>({planet:p.planet,start:(''+p.startDate).slice(0,10),end:(''+p.endDate).slice(0,10)}));
+fs.writeFileSync(process.argv[2],JSON.stringify({lagnaSign:res.lagna.signName,lagnaSignNum:sn(res.lagna.signName),nakshatra:res.lagna.nakshatra,houses,planets,dasha:{current:{maha:d.currentDasha.maha,antar:d.currentDasha.antar},timeline}}));
+console.log('ok');
