@@ -1,6 +1,6 @@
 const A=require('./index.js');
-const LAT=-28.33,LON=153.40,TZ='Australia/Sydney';
-const res=A.calculateBirthChart({date:'1992-11-02',time:'03:12',latitude:LAT,longitude:LON,timezone:TZ});
+const LAT=27.17,LON=87.05,TZ='Asia/Kathmandu';
+const res=A.calculateBirthChart({date:'2001-01-30',time:'23:33',latitude:LAT,longitude:LON,timezone:TZ});
 const plist=Array.isArray(res.planets)?res.planets:Object.values(res.planets);
 const L=res.lagna,m=plist.find(p=>p.name==='Moon');
 console.log('LAGNA',L.signName,L.signNumber,L.nakshatra,'deg',L.degreeInSign.toFixed(2));
@@ -10,7 +10,7 @@ plist.forEach(p=>console.log('P',p.name,p.signName,'deg='+p.degreeInSign.toFixed
  console.log('--- D'+dv+' LAGNA',dc.lagnaSign.name);
  dc.planets.forEach(p=>console.log('D'+dv,p.planet,p.vargaSignName,'house='+(((p.vargaSignNumber-lag+12)%12)+1)));}catch(e){console.log('D'+dv+' ERR',e.message)}});
 try{console.log('YOGAS',JSON.stringify((A.detectYogas(plist,res.houses,L)||[]).slice(0,12)));}catch(e){}
-const d=A.calculateVimshottariDasha(new Date('1992-11-01T17:12:00Z'),m.nakshatra,(m.longitude%13.3333333),3);
+const d=A.calculateVimshottariDasha(new Date('2001-01-30T17:48:00Z'),m.nakshatra,(m.longitude%13.3333333),3);
 const TODAY=new Date('2026-07-22');
 d.mahaDashas.forEach(p=>console.log('MD',p.planet,(''+p.startDate).slice(0,10),'→',(''+p.endDate).slice(0,10)));
 const md=d.mahaDashas.find(p=>new Date(p.startDate)<=TODAY&&new Date(p.endDate)>TODAY);
