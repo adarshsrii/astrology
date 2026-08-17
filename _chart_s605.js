@@ -1,0 +1,37 @@
+const A=require('./index.js');
+const B={date:'1995-09-03',time:'15:30',latitude:26.5448,longitude:88.0895,timezone:'Asia/Kathmandu'};
+const r=A.calculateBirthChart(B);
+const pl=Array.isArray(r.planets)?r.planets:Object.values(r.planets);
+const L=r.lagna,m=pl.find(p=>p.name==='Moon');
+console.log('LAGNA',L.signName,L.degreeInSign.toFixed(2),'| MOON(raashi)',m.signName,m.degreeInSign.toFixed(2),m.nakshatra);
+console.log('\n-- D1 --');
+pl.forEach(p=>{const h=((p.signNumber-L.signNumber+12)%12)+1;
+ console.log(p.name.padEnd(8),p.signName.padEnd(12),p.degreeInSign.toFixed(2).padStart(6),'H'+h,String(p.nakshatra).padEnd(14),p.retrograde?'R':' ',p.dignity||'');});
+console.log('\n-- morning 03:30 cross-check --');
+const r2=A.calculateBirthChart({...B,time:'03:30'});
+const p2=Array.isArray(r2.planets)?r2.planets:Object.values(r2.planets);
+console.log('  lagna',r2.lagna.signName,'| moon',p2.find(p=>p.name==='Moon').signName);
+console.log('\n-- D9 NAVAMSA --');
+const d9=A.calculateDivisionalChart(9,pl,L.signNumber,L.degreeInSign);
+console.log('  D9 lagna:',d9.lagna&&d9.lagna.name);
+(d9.planets||[]).forEach(p=>console.log('  ',(p.name||'').padEnd(8),(p.sign&&p.sign.name)||p.signName||''));
+console.log('\n-- MANGLIK --');
+console.log(JSON.stringify(A.analyzeManglik(pl,r.houses,L.signNumber)));
+let nak=m.nakshatra; if(nak==='Mula')nak='Moola';
+const d=A.calculateVimshottariDasha(new Date('1995-09-03T15:30:00+05:45'),nak,(m.longitude%13.3333333),3);
+const T=new Date('2026-08-17');
+const md=d.mahaDashas.find(p=>new Date(p.startDate)<=T&&new Date(p.endDate)>T);
+const ad=md.subPeriods.find(p=>new Date(p.startDate)<=T&&new Date(p.endDate)>T);
+console.log('\nCURRENT MD',md.planet,(''+md.startDate).slice(0,10),'->',(''+md.endDate).slice(0,10));
+console.log('CURRENT AD',ad.planet,(''+ad.startDate).slice(0,10),'->',(''+ad.endDate).slice(0,10));
+console.log('\n-- ADs in current MD --');
+md.subPeriods.forEach(p=>console.log('  ',p.planet.padEnd(8),(''+p.startDate).slice(0,10),'->',(''+p.endDate).slice(0,10)));
+console.log('\n-- MD timeline --');
+d.mahaDashas.forEach(p=>console.log('  ',p.planet.padEnd(8),(''+p.startDate).slice(0,10),'->',(''+p.endDate).slice(0,10)));
+const nx=d.mahaDashas.find(p=>new Date(p.startDate)>T);
+if(nx){console.log('\n-- ADs in NEXT MD ('+nx.planet+') --');nx.subPeriods.forEach(p=>console.log('  ',p.planet.padEnd(8),(''+p.startDate).slice(0,10),'->',(''+p.endDate).slice(0,10)));}
+console.log('\n-- TRANSITS Ju/Sa --');
+['2026-08-17','2026-11-01','2027-02-01','2027-05-01','2027-09-01','2028-01-01','2028-06-01','2029-01-01'].forEach(ds=>{
+ const t=A.calculateBirthChart({date:ds,time:'12:00',latitude:26.5448,longitude:88.0895,timezone:'Asia/Kathmandu'});
+ const tp=Array.isArray(t.planets)?t.planets:Object.values(t.planets);
+ console.log('  ',ds,['Jupiter','Saturn'].map(n=>{const p=tp.find(x=>x.name===n);return n.slice(0,2)+':'+p.signName+' '+p.degreeInSign.toFixed(1)+(p.retrograde?'R':'')}).join('   '));});
