@@ -255,3 +255,10 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm
 .vercel
+
+# Local one-off chart debug probes. Contain real users' birth details and
+# help-message text, and this repo is public — keep them off origin.
+_chart_*.js
+_s*.js
+_*_state.js
+_*_note.js
