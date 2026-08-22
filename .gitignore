@@ -262,3 +262,9 @@ _chart_*.js
 _s*.js
 _*_state.js
 _*_note.js
+
+# All root-level one-off debug probes (_c698.js, _batch_today.js, ...). This repo
+# is PUBLIC and the probes carry real users names, birth data and readings.
+# The 18 Aug patterns below missed _c6*/_batch_*/_extra_*/_agent_* — this catches
+# every root _*.js, so a new probe cannot leak by not matching a name pattern.
+/_*.js
