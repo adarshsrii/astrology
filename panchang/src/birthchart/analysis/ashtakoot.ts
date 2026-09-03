@@ -55,9 +55,9 @@ const NAKSHATRA_VARNA: number[] = [
   /* 7  Punarvasu  */ 1,
   /* 8  Pushya     */ 2,
   /* 9  Ashlesha   */ 0,
-  /* 10 Magha      */ 0,
+  /* 10 Magha      */ 2,
   /* 11 P.Phalguni */ 3,
-  /* 12 U.Phalguni */ 2,
+  /* 12 U.Phalguni */ 0,
   /* 13 Hasta      */ 1,
   /* 14 Chitra     */ 0,
   /* 15 Swati      */ 3,
@@ -187,10 +187,10 @@ const NAKSHATRA_GANA: number[] = [
   /* 12 U.Phalguni */ 1,
   /* 13 Hasta      */ 0,
   /* 14 Chitra     */ 2,
-  /* 15 Swati      */ 0,
+  /* 15 Swati      */ 2,
   /* 16 Vishakha   */ 2,
   /* 17 Anuradha   */ 0,
-  /* 18 Jyeshtha   */ 2,
+  /* 18 Jyeshtha   */ 0,
   /* 19 Moola      */ 2,
   /* 20 P.Ashadha  */ 1,
   /* 21 U.Ashadha  */ 1,
@@ -216,6 +216,8 @@ const GANA_MATRIX: number[][] = [
  * Nadi (नाड़ी) — Health/progeny
  * Nakshatra → Nadi: 0=Aadi(Vata), 1=Madhya(Pitta), 2=Antya(Kapha)
  */
+// Adi=0 Madhya=1 Antya=2. NOTE the middle nine (10-18) run in the REVERSE
+// order of the first nine; this is not the same block repeated three times.
 const NAKSHATRA_NADI: number[] = [
   /* 1  Ashwini    */ 0,
   /* 2  Bharani    */ 1,
@@ -226,15 +228,15 @@ const NAKSHATRA_NADI: number[] = [
   /* 7  Punarvasu  */ 0,
   /* 8  Pushya     */ 1,
   /* 9  Ashlesha   */ 2,
-  /* 10 Magha      */ 0,
+  /* 10 Magha      */ 2,
   /* 11 P.Phalguni */ 1,
-  /* 12 U.Phalguni */ 2,
-  /* 13 Hasta      */ 2,
+  /* 12 U.Phalguni */ 0,
+  /* 13 Hasta      */ 0,
   /* 14 Chitra     */ 1,
-  /* 15 Swati      */ 0,
-  /* 16 Vishakha   */ 0,
+  /* 15 Swati      */ 2,
+  /* 16 Vishakha   */ 2,
   /* 17 Anuradha   */ 1,
-  /* 18 Jyeshtha   */ 2,
+  /* 18 Jyeshtha   */ 0,
   /* 19 Moola      */ 0,
   /* 20 P.Ashadha  */ 1,
   /* 21 U.Ashadha  */ 2,
@@ -324,7 +326,10 @@ function calcGana(groom: MatchInput, bride: MatchInput): number {
 }
 
 function calcBhakoot(groom: MatchInput, bride: MatchInput): number {
-  const diff = ((groom.rashiNumber - bride.rashiNumber + 12) % 12) || 12;
+  // Bhakoot counts INCLUSIVELY from one rashi to the other, so same-rashi is 1,
+  // not 12. The old `|| 12` scored same-rashi as a dosha and let a genuine
+  // 2-12 pair through as clean.
+  const diff = ((groom.rashiNumber - bride.rashiNumber + 12) % 12) + 1;
   return BHAKOOT_BAD_DISTANCES.has(diff) ? 0 : 7;
 }
 
