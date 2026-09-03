@@ -441,5 +441,10 @@ function getHousesBetween(fromHouse: number, toHouse: number): number[] {
  * Jupiter has special aspects on 5th, 7th, and 9th houses from itself.
  */
 function getJupiterAspectedHouses(jupiterHouse: number): number[] {
-  return [5, 7, 9].map((offset) => ((jupiterHouse - 1 + offset) % 12) + 1);
+  // An nth aspect counts INCLUSIVELY from the planet's own house, so the 5th aspect
+  // lands at +4, not +5. shadbala.ts getAspectedHouses has always done it that way;
+  // this copy did not, and shifted every aspect one house forward -- Jupiter in the
+  // 5th returned 10/12/2 instead of 9/11/1, which falsely cancelled Manglik for a
+  // Mars in the 12th. Caught on a real user chart.
+  return [5, 7, 9].map((offset) => ((jupiterHouse - 1 + offset - 1) % 12) + 1);
 }

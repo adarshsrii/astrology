@@ -146,21 +146,34 @@ describe('Manglik Dosha', () => {
     expect(result.cancellations.some((c) => c.includes('conjunct Jupiter'))).toBe(true);
   });
 
+  // Aspects count INCLUSIVELY from the planet's own house, so Jupiter in house 5
+  // aspects the 5th/7th/9th from there = houses 9, 11 and 1. The previous version of
+  // this test asserted 10/12/2 because its comment recomputed the implementation
+  // instead of the rule, so it passed while the code was wrong.
   test('Mars aspected by Jupiter = mild', () => {
-    // Jupiter in house 5, aspects 9th (house 1), 11th (house 3), 7th (house 11) from itself
-    // Jupiter aspects: 5+5=10, 5+7=12, 5+9=2  →  houses 10, 12, 2 (mod 12)
-    // Actually: ((5-1+5) % 12)+1 = 10, ((5-1+7) % 12)+1 = 12, ((5-1+9) % 12)+1 = 2
-    // So Jupiter in house 5 aspects houses 10, 12, 2
-    // Put Mars in house 2 → aspected by Jupiter
+    // Jupiter house 5 -> 9th aspect lands on house 1, where Mars sits.
+    // Taurus deliberately: a fire sign in the 1st would cancel by a different rule.
     const planets = [
       makeGraha({ name: 'Mars', signName: 'Taurus', signNumber: 2 }),
       makeGraha({ name: 'Jupiter', signName: 'Leo', signNumber: 5 }),
     ];
-    const houses = makeHouses({ 2: ['Mars'], 5: ['Jupiter'] });
+    const houses = makeHouses({ 1: ['Mars'], 5: ['Jupiter'] });
     const result = analyzeManglik(planets, houses);
     expect(result.isManglik).toBe(true);
     expect(result.severity).toBe('mild');
     expect(result.cancellations.some((c) => c.includes('aspected by Jupiter'))).toBe(true);
+  });
+
+  test('Jupiter in 5th does NOT aspect Mars in 12th', () => {
+    // The real chart that exposed the bug. House 12 is not 9/11/1, so nothing cancels.
+    const planets = [
+      makeGraha({ name: 'Mars', signName: 'Aquarius', signNumber: 11 }),
+      makeGraha({ name: 'Jupiter', signName: 'Cancer', signNumber: 4 }),
+    ];
+    const houses = makeHouses({ 12: ['Mars'], 5: ['Jupiter'] });
+    const result = analyzeManglik(planets, houses);
+    expect(result.isManglik).toBe(true);
+    expect(result.cancellations.some((c) => c.includes('aspected by Jupiter'))).toBe(false);
   });
 
   test('Mars in fire sign in 1st house cancels Manglik', () => {
