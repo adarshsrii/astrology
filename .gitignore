@@ -268,3 +268,6 @@ _*_note.js
 # The 18 Aug patterns below missed _c6*/_batch_*/_extra_*/_agent_* — this catches
 # every root _*.js, so a new probe cannot leak by not matching a name pattern.
 /_*.js
+
+# Editor/manual backups — scratch, never part of the library.
+*.bak-*

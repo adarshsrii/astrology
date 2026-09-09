@@ -42,37 +42,45 @@ export interface AshtakootResult {
 
 /**
  * Varna (वर्ण) — Spiritual compatibility
- * Nakshatra → Varna: Brahmin(3), Kshatriya(2), Vaishya(1), Shudra(0)
- * Index = nakshatraNumber - 1
+ * Varna is read from the MOON RASHI, not the nakshatra. The old table indexed
+ * nakshatras and scored the wrong varna for most pairs.
+ * Brahmin(3) Karka/Vrischik/Meen · Kshatriya(2) Mesh/Simha/Dhanu
+ * Vaishya(1) Vrishabh/Kanya/Makar · Shudra(0) Mithun/Tula/Kumbha
+ * Index = rashiNumber - 1
  */
-const NAKSHATRA_VARNA: number[] = [
-  /* 1  Ashwini    */ 2,
-  /* 2  Bharani    */ 0,
-  /* 3  Krittika   */ 3,
-  /* 4  Rohini     */ 0,
-  /* 5  Mrigashira */ 1,
-  /* 6  Ardra      */ 2,
-  /* 7  Punarvasu  */ 1,
-  /* 8  Pushya     */ 2,
-  /* 9  Ashlesha   */ 0,
-  /* 10 Magha      */ 2,
-  /* 11 P.Phalguni */ 3,
-  /* 12 U.Phalguni */ 0,
-  /* 13 Hasta      */ 1,
-  /* 14 Chitra     */ 0,
-  /* 15 Swati      */ 3,
-  /* 16 Vishakha   */ 3,
-  /* 17 Anuradha   */ 0,
-  /* 18 Jyeshtha   */ 1,
-  /* 19 Moola      */ 2,
-  /* 20 P.Ashadha  */ 3,
-  /* 21 U.Ashadha  */ 2,
-  /* 22 Shravana   */ 1,
-  /* 23 Dhanishta  */ 0,
-  /* 24 Shatabhisha*/ 2,
-  /* 25 P.Bhadra   */ 3,
-  /* 26 U.Bhadra   */ 2,
-  /* 27 Revati     */ 1,
+const RASHI_VARNA: number[] = [
+  /* 1  Mesh      */ 2,
+  /* 2  Vrishabh  */ 1,
+  /* 3  Mithun    */ 0,
+  /* 4  Karka     */ 3,
+  /* 5  Simha     */ 2,
+  /* 6  Kanya     */ 1,
+  /* 7  Tula      */ 0,
+  /* 8  Vrischik  */ 3,
+  /* 9  Dhanu     */ 2,
+  /* 10 Makar     */ 1,
+  /* 11 Kumbha    */ 0,
+  /* 12 Meen      */ 3,
+];
+
+/**
+ * Rashi lord — used by Graha Maitri, which compares the lords of the two MOON
+ * SIGNS. The old code compared nakshatra lords, a different quantity entirely.
+ * Index = rashiNumber - 1
+ */
+const RASHI_LORD: string[] = [
+  /* 1  Mesh      */ 'Mars',
+  /* 2  Vrishabh  */ 'Venus',
+  /* 3  Mithun    */ 'Mercury',
+  /* 4  Karka     */ 'Moon',
+  /* 5  Simha     */ 'Sun',
+  /* 6  Kanya     */ 'Mercury',
+  /* 7  Tula      */ 'Venus',
+  /* 8  Vrischik  */ 'Mars',
+  /* 9  Dhanu     */ 'Jupiter',
+  /* 10 Makar     */ 'Saturn',
+  /* 11 Kumbha    */ 'Saturn',
+  /* 12 Meen      */ 'Jupiter',
 ];
 
 /**
@@ -187,10 +195,10 @@ const NAKSHATRA_GANA: number[] = [
   /* 12 U.Phalguni */ 1,
   /* 13 Hasta      */ 0,
   /* 14 Chitra     */ 2,
-  /* 15 Swati      */ 2,
+  /* 15 Swati      */ 0,
   /* 16 Vishakha   */ 2,
   /* 17 Anuradha   */ 0,
-  /* 18 Jyeshtha   */ 0,
+  /* 18 Jyeshtha   */ 2,
   /* 19 Moola      */ 2,
   /* 20 P.Ashadha  */ 1,
   /* 21 U.Ashadha  */ 1,
@@ -258,8 +266,8 @@ const BHAKOOT_BAD_DISTANCES = new Set([2, 5, 6, 8, 9, 12]);
 // ── Guna Calculators ─────────────────────────────────────────────────────────
 
 function calcVarna(groom: MatchInput, bride: MatchInput): number {
-  const gv = NAKSHATRA_VARNA[groom.nakshatraNumber - 1];
-  const bv = NAKSHATRA_VARNA[bride.nakshatraNumber - 1];
+  const gv = RASHI_VARNA[groom.rashiNumber - 1];
+  const bv = RASHI_VARNA[bride.rashiNumber - 1];
   // Groom's varna should be >= bride's varna
   return gv >= bv ? 1 : 0;
 }
@@ -291,8 +299,10 @@ function calcYoni(groom: MatchInput, bride: MatchInput): number {
 }
 
 function calcGrahaMaitri(groom: MatchInput, bride: MatchInput): number {
-  const gl = groom.nakshatraLord;
-  const bl = bride.nakshatraLord;
+  // Graha Maitri compares the lords of the two Moon SIGNS. Using
+  // nakshatraLord here compared a different quantity and scored most pairs wrong.
+  const gl = RASHI_LORD[groom.rashiNumber - 1];
+  const bl = RASHI_LORD[bride.rashiNumber - 1];
 
   if (gl === bl) return 5;
 
