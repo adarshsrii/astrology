@@ -285,6 +285,29 @@ const PLANETARY_REMEDIES: Record<string, PlanetaryRemedy> = {
   },
 };
 
+// ── Planet → Direction ──────────────────────────────────────────────────────────
+
+/**
+ * Auspicious direction for each graha (Vastu / puja facing, gemstone-wearing
+ * direction). Derived from PLANETARY_REMEDIES so there is exactly one copy of
+ * each value — this table existed only inside the remedy objects and was
+ * therefore unreachable for any planet the remedy engine did not flag as weak.
+ *
+ * ⚠ CONTENT DECISION PENDING (Saurabh's call, not the engine's):
+ * Rahu AND Ketu are both 'Southwest' here. Several traditional sources put Ketu
+ * elsewhere (Ketu is commonly given the north-west or the flag/Dhwaja corner,
+ * with Nairritya/south-west reserved for Rahu). The value is LEFT AS IS on
+ * purpose — changing it silently would move every Ketu remedy in the report.
+ */
+export const PLANET_DIRECTIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(PLANETARY_REMEDIES).map(([name, remedy]) => [name, remedy.direction]),
+);
+
+/** Direction for one graha, or null if the name is unknown. */
+export function getPlanetDirection(planet: string): string | null {
+  return PLANET_DIRECTIONS[planet] ?? null;
+}
+
 // ── Dusthana Houses ─────────────────────────────────────────────────────────────
 
 const DUSTHANA_HOUSES = [6, 8, 12];

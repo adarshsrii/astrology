@@ -12,6 +12,8 @@ import {
   MOOLATRIKONA_TABLE,
   SIGN_NAMES,
 } from '../core/constants';
+import { getSignLord } from '../core/lords';
+import { NATURAL_FRIENDSHIPS } from '../analysis/friendships';
 import { SHODASHVARGA_CHARTS } from './charts';
 import { calculateDivisionalChart, PlanetInput } from './calculator';
 
@@ -63,8 +65,19 @@ function getVargaDignity(planet: string, signNumber: number): string {
     return 'own_sign';
   }
 
-  // For simplified scoring, everything else is neutral.
-  // A full implementation would check natural friendships with the sign lord.
+  // Otherwise the mark comes from the planet's natural relationship with the
+  // lord of the sign it occupies. Without this branch getVargaDignity could
+  // never return 'friendly' or 'enemy', so the FR/EN marks in the report's
+  // dignity map were unreachable and every such cell scored a flat 5 points.
+  const lord = getSignLord(signNumber);
+  const relation = NATURAL_FRIENDSHIPS[planet];
+  if (relation) {
+    if (relation.friends.includes(lord)) return 'friendly';
+    if (relation.enemies.includes(lord)) return 'enemy';
+  }
+
+  // ponytail: NATURAL (naisargika) friendship only. Panchadha/compound maitri
+  // needs house positions, which a varga sign on its own does not carry.
   return 'neutral';
 }
 

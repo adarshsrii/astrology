@@ -6,7 +6,10 @@ export type { BirthChartOptions } from './birthchart';
 export type { GrahaName, Dignity, HouseSystemType, AyanamsaType, BirthData, GrahaPosition, HouseInfo, ChartBox, ChartLayout, LagnaInfo, BirthChartResult, } from './types';
 export { ALL_GRAHAS } from './types';
 export { determineDignity, determineCombustion, getDignitySymbol } from './core/states';
-export { calculateHouses, assignPlanetsToHouses, populateHousePlanets } from './core/houses';
+export { calculateHouses, assignPlanetsToHouses, populateHousePlanets, calculateSudarshanaChakra } from './core/houses';
+export type { SudarshanaView, SudarshanaChakra } from './core/houses';
+export { SIGN_LORDS, getSignLord, getSignName, getHouseLords } from './core/lords';
+export type { HouseLordInfo } from './core/lords';
 export { generateChartLayouts } from './layout/chart-layout';
 export { calculateTattvaBalance } from './analysis/tattva';
 export type { TattvaBalance, TattvaElementInfo, TattvaInput } from './analysis/tattva';
@@ -26,5 +29,5 @@ export { calculateVimshottariDasha, DASHA_YEARS, DASHA_SEQUENCE, NAKSHATRA_LORDS
 export type { DashaPeriod, VimshottariResult } from './dasha';
 export { calculateDivisionalChart, SHODASHVARGA_CHARTS, getChartInfo, calculateShodashvarga } from './divisional';
 export type { DivisionalPosition, DivisionalChart, PlanetInput, VargaChartInfo, ShodashvargaEntry, ShodashvargaChartScore } from './divisional';
-export { getNameSuggestions, NAKSHATRA_SYLLABLES, getRemedies, getPlanetRemedy } from './recommendations';
+export { getNameSuggestions, NAKSHATRA_SYLLABLES, getRemedies, getPlanetRemedy, PLANET_DIRECTIONS, getPlanetDirection } from './recommendations';
 export type { NameSuggestion, NameEntry, PlanetaryRemedy, GemstoneInfo, MantraInfo, CharityInfo, WeakPlanetRemedy, RemedyResult, RemedyPlanetInput } from './recommendations';

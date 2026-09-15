@@ -30,7 +30,9 @@ export class Ephemeris {
         'Uranus': 7,   // SE_URANUS
         'Neptune': 8,  // SE_NEPTUNE
         'Pluto': 9,    // SE_PLUTO
-        'Rahu': 11,    // SE_MEAN_NODE (North Node)
+        'Rahu': 10,    // SE_MEAN_NODE (North Node). 10, NOT 11 — 11 is SE_TRUE_NODE, and
+                       // Ketu below is built from SE_MEAN_NODE+180, so 11 here bent the axis
+                       // by up to ~1.9 deg. Mean node is also what Lahiri panchangs publish.
         'Ketu': -1     // Special handling for South Node (180° from Rahu)
     };
 
@@ -267,49 +269,46 @@ export class Ephemeris {
         }
     }
 
-    calculateSunrise(date: Date, location: Location): Date | null {
+    /**
+     * Sunrise / sunset from the Swiss Ephemeris the rest of this class already uses.
+     * Replaces a hand-rolled NOAA approximation whose day-of-year term evaluated to
+     * 675536 instead of 253, which corrupted the declination and produced a negative
+     * dinamana. -0.833 deg is the standard rise/set altitude: solar semidiameter plus
+     * mean atmospheric refraction.
+     */
+    private solarEvent(date: Date, location: Location, which: 'rise' | 'set'): Date | null {
         try {
-            // Improved sunrise calculation using NOAA Solar Calculator algorithm
-            const year = date.getUTCFullYear();
-            const month = date.getUTCMonth() + 1;
-            const day = date.getUTCDate();
-            
-            // Calculate Julian day number
-            const a = Math.floor((14 - month) / 12);
-            const y = year - a;
-            const m = month + 12 * a - 3;
-            const jd = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-            
-            // Calculate day of year
-            const dayOfYear = jd - Math.floor((14 - 1) / 12) * 365 - Math.floor(y / 4) + Math.floor(y / 100) - Math.floor(y / 400) + Math.floor((153 * (1 + 12 * Math.floor((14 - 1) / 12) - 3) + 2) / 5) + 1 - 32045;
-            
-            // More accurate solar calculations
-            const P = Math.asin(0.39795 * Math.cos(0.98563 * (dayOfYear - 173) * Math.PI / 180));
-            const argumentum = Math.tan(location.latitude * Math.PI / 180) * Math.tan(P);
-            
-            if (Math.abs(argumentum) > 1) {
-                return null; // Polar day or night
+            const D = Math.PI / 180;
+            const jd0 = swisseph.swe_julday(date.getUTCFullYear(), date.getUTCMonth() + 1,
+                                            date.getUTCDate(), 0, swisseph.SE_GREG_CAL);
+            const sid: any = swisseph.swe_sidtime(jd0);
+            const gmst0 = (typeof sid === 'number' ? sid : sid.siderialTime) * 15; // degrees at 0h UT
+            const sign = which === 'rise' ? -1 : 1;
+            const { latitude: lat, longitude: lon } = location;
+
+            let t = jd0 + 0.5;
+            for (let i = 0; i < 4; i++) {          // converges in 2-3; the Sun moves during the day
+                const sun: any = swisseph.swe_calc_ut(t, swisseph.SE_SUN,
+                    swisseph.SEFLG_SWIEPH | swisseph.SEFLG_EQUATORIAL);
+                if (!sun || sun.declination === undefined) return null;
+                const dec = sun.declination;
+                const cosH = (Math.sin(-0.833 * D) - Math.sin(lat * D) * Math.sin(dec * D))
+                           / (Math.cos(lat * D) * Math.cos(dec * D));
+                if (Math.abs(cosH) > 1) return null;               // polar day or night
+                const H = Math.acos(cosH) / D;
+                const lst = sun.rectAscension + sign * H;
+                const delta = (((lst - (gmst0 + lon)) % 360) + 360) % 360;
+                t = jd0 + delta / 360.9856;                        // sidereal degrees per day
             }
-            
-            const hourAngle = Math.acos(-argumentum) * 180 / Math.PI;
-            const sunrise = 12 - hourAngle / 15 - location.longitude / 15;
-            
-            // Adjust for UTC
-            let sunriseUTC = sunrise;
-            if (sunriseUTC < 0) sunriseUTC += 24;
-            if (sunriseUTC >= 24) sunriseUTC -= 24;
-            
-            const sunriseHours = Math.floor(sunriseUTC);
-            const sunriseMinutes = Math.floor((sunriseUTC - sunriseHours) * 60);
-            const sunriseSeconds = Math.floor(((sunriseUTC - sunriseHours) * 60 - sunriseMinutes) * 60);
-            
-            return new Date(Date.UTC(year, month - 1, day, sunriseHours, sunriseMinutes, sunriseSeconds));
-            
+            return new Date((t - 2440587.5) * 86400000);           // JD -> unix ms
         } catch (error) {
-            console.warn('Sunrise calculation failed:', error);
-            // Fallback calculation
-            return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 6, 0, 0, 0);
+            console.warn(`Solar ${which} calculation failed:`, error);
+            return null;
         }
+    }
+
+    calculateSunrise(date: Date, location: Location): Date | null {
+        return this.solarEvent(date, location, 'rise');
     }
 
     private calculate_sun_altitude(sunLon: number, sunLat: number, location: Location, jd: number): number {
@@ -426,48 +425,7 @@ export class Ephemeris {
 
 
     calculateSunset(date: Date, location: Location): Date | null {
-        try {
-            // Improved sunset calculation using NOAA Solar Calculator algorithm
-            const year = date.getUTCFullYear();
-            const month = date.getUTCMonth() + 1;
-            const day = date.getUTCDate();
-            
-            // Calculate Julian day number
-            const a = Math.floor((14 - month) / 12);
-            const y = year - a;
-            const m = month + 12 * a - 3;
-            const jd = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-            
-            // Calculate day of year
-            const dayOfYear = jd - Math.floor((14 - 1) / 12) * 365 - Math.floor(y / 4) + Math.floor(y / 100) - Math.floor(y / 400) + Math.floor((153 * (1 + 12 * Math.floor((14 - 1) / 12) - 3) + 2) / 5) + 1 - 32045;
-            
-            // More accurate solar calculations
-            const P = Math.asin(0.39795 * Math.cos(0.98563 * (dayOfYear - 173) * Math.PI / 180));
-            const argumentum = Math.tan(location.latitude * Math.PI / 180) * Math.tan(P);
-            
-            if (Math.abs(argumentum) > 1) {
-                return null; // Polar day or night
-            }
-            
-            const hourAngle = Math.acos(-argumentum) * 180 / Math.PI;
-            const sunset = 12 + hourAngle / 15 - location.longitude / 15;
-            
-            // Adjust for UTC
-            let sunsetUTC = sunset;
-            if (sunsetUTC < 0) sunsetUTC += 24;
-            if (sunsetUTC >= 24) sunsetUTC -= 24;
-            
-            const sunsetHours = Math.floor(sunsetUTC);
-            const sunsetMinutes = Math.floor((sunsetUTC - sunsetHours) * 60);
-            const sunsetSeconds = Math.floor(((sunsetUTC - sunsetHours) * 60 - sunsetMinutes) * 60);
-            
-            return new Date(Date.UTC(year, month - 1, day, sunsetHours, sunsetMinutes, sunsetSeconds));
-            
-        } catch (error) {
-            console.warn('Sunset calculation failed:', error);
-            // Fallback calculation
-            return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 18, 0, 0, 0);
-        }
+        return this.solarEvent(date, location, 'set');
     }
 
     calculateNakshatra(longitude: number): { nakshatra: number; pada: number; name: string } {
@@ -475,7 +433,7 @@ export class Ephemeris {
             'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra',
             'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni',
             'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
-            'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha',
+            'Moola', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishtha', 'Shatabhisha',
             'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
         ];
 

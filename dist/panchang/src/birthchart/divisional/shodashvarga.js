@@ -7,6 +7,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.calculateShodashvarga = void 0;
 const constants_1 = require("../core/constants");
+const lords_1 = require("../core/lords");
+const friendships_1 = require("../analysis/friendships");
 const charts_1 = require("./charts");
 const calculator_1 = require("./calculator");
 // ── Dignity detection for varga charts ──────────────────────────────────────
@@ -36,8 +38,20 @@ function getVargaDignity(planet, signNumber) {
     if (ownSigns && ownSigns.includes(signNumber)) {
         return 'own_sign';
     }
-    // For simplified scoring, everything else is neutral.
-    // A full implementation would check natural friendships with the sign lord.
+    // Otherwise the mark comes from the planet's natural relationship with the
+    // lord of the sign it occupies. Without this branch getVargaDignity could
+    // never return 'friendly' or 'enemy', so the FR/EN marks in the report's
+    // dignity map were unreachable and every such cell scored a flat 5 points.
+    const lord = (0, lords_1.getSignLord)(signNumber);
+    const relation = friendships_1.NATURAL_FRIENDSHIPS[planet];
+    if (relation) {
+        if (relation.friends.includes(lord))
+            return 'friendly';
+        if (relation.enemies.includes(lord))
+            return 'enemy';
+    }
+    // ponytail: NATURAL (naisargika) friendship only. Panchadha/compound maitri
+    // needs house positions, which a varga sign on its own does not carry.
     return 'neutral';
 }
 // ── Varga Viswa point values ────────────────────────────────────────────────

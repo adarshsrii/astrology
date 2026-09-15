@@ -23,3 +23,23 @@ export declare function assignPlanetsToHouses(planets: GrahaPosition[], lagnaSig
  * Populate the houses' planet arrays using the assignment map.
  */
 export declare function populateHousePlanets(houses: HouseInfo[], planets: GrahaPosition[], assignment: Record<string, number>): HouseInfo[];
+export interface SudarshanaView {
+    reference: 'lagna' | 'moon' | 'sun';
+    referenceSignNumber: number;
+    referenceSignName: string;
+    houses: HouseInfo[];
+}
+export interface SudarshanaChakra {
+    lagna: SudarshanaView;
+    moon: SudarshanaView;
+    sun: SudarshanaView;
+}
+/**
+ * Sudarshana Chakra — the same chart read three times: from the Lagna, from the
+ * Moon's sign (Chandra lagna) and from the Sun's sign (Surya lagna). A result
+ * confirmed in all three readings is the classical test of a strong promise.
+ *
+ * ponytail: whole-sign only, and no interpretation — this returns the three
+ * house sets and stops. Reading them is the report's job.
+ */
+export declare function calculateSudarshanaChakra(planets: GrahaPosition[], lagnaSignNumber: number): SudarshanaChakra;

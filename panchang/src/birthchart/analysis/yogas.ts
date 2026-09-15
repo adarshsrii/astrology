@@ -5,14 +5,19 @@
  * Based on: Brihat Parashara Hora Shastra, Phaladeepika, Saravali
  */
 
+import { getSignLord } from '../core/lords';
+import { grahaName } from '../../core/constants';
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface DetectedYoga {
   name: string;
   nameHi: string;
+  nameNe: string;
   type: 'raj' | 'dhan' | 'pancha_mahapurusha' | 'nabhas' | 'chandra' | 'surya' | 'negative' | 'other';
   description: string;
   descriptionHi: string;
+  descriptionNe: string;
   planets: string[];
   strength: 'strong' | 'moderate' | 'mild';
 }
@@ -27,11 +32,7 @@ export interface YogaResult {
 }
 
 // ─── Sign Lords ─────────────────────────────────────────────────────────────
-
-const SIGN_LORD: Record<number, string> = {
-  1: 'Mars', 2: 'Venus', 3: 'Mercury', 4: 'Moon', 5: 'Sun', 6: 'Mercury',
-  7: 'Venus', 8: 'Mars', 9: 'Jupiter', 10: 'Saturn', 11: 'Saturn', 12: 'Jupiter',
-};
+// The table lives in core/lords.ts — it was duplicated here and in ashtakoot.ts.
 
 // Kendra houses: 1, 4, 7, 10
 const KENDRA = [1, 4, 7, 10];
@@ -53,7 +54,7 @@ interface PlanetInfo {
 }
 
 function getLord(signNum: number): string {
-  return SIGN_LORD[signNum] || 'Sun';
+  return getSignLord(signNum);
 }
 
 function getHouseLord(houses: any[], houseNum: number): string {
@@ -116,10 +117,12 @@ export function detectYogas(
       const ph = getPlanetHouse(planetInfos, planet);
       yogas.push({
         name: `Raj Yoga (${planet} — Kendra-Trikona Lord)`,
-        nameHi: `राजयोग (${planet} — केन्द्र-त्रिकोण स्वामी)`,
+        nameHi: `राजयोग (${grahaName(planet, 'hi')} — केन्द्र-त्रिकोण स्वामी)`,
+        nameNe: `राजयोग (${grahaName(planet, 'ne')} — केन्द्र-त्रिकोण स्वामी)`,
         type: 'raj',
         description: `${planet} rules both a Kendra and a Trikona house, making it a Yoga Karaka (single planet forming Raj Yoga). This is one of the most powerful configurations, giving authority, success, and recognition especially during ${planet}'s Dasha periods.`,
-        descriptionHi: `${planet} केन्द्र और त्रिकोण दोनों भावों का स्वामी है, जो इसे योगकारक बनाता है (एक ग्रह से राजयोग)। यह सबसे शक्तिशाली विन्यासों में से एक है, जो विशेष रूप से ${planet} की दशा काल में अधिकार, सफलता और मान्यता प्रदान करता है।`,
+        descriptionHi: `${grahaName(planet, 'hi')} केन्द्र और त्रिकोण दोनों भावों का स्वामी है, जो इसे योगकारक बनाता है (एक ग्रह से राजयोग)। यह सबसे शक्तिशाली विन्यासों में से एक है, जो विशेष रूप से ${grahaName(planet, 'hi')} की दशा काल में अधिकार, सफलता और मान्यता प्रदान करता है।`,
+        descriptionNe: `${grahaName(planet, 'ne')} केन्द्र र त्रिकोण दुवै भावको स्वामी हो, जसले यसलाई योगकारक बनाउँछ (एउटै ग्रहबाट बन्ने राजयोग)। यो सबैभन्दा शक्तिशाली योगहरूमध्ये एक हो, जसले विशेष गरी ${grahaName(planet, 'ne')}को दशा अवधिमा अधिकार, सफलता र प्रतिष्ठा दिन्छ।`,
         planets: [planet],
         strength: isInKendra(ph) || isInTrikona(ph) ? 'strong' : 'moderate',
       });
@@ -142,10 +145,12 @@ export function detectYogas(
       if (klHouse === tlHouse && klHouse > 0) {
         yogas.push({
           name: `Raj Yoga (${kl}-${tl} Conjunction)`,
-          nameHi: `राजयोग (${kl}-${tl} युति)`,
+          nameHi: `राजयोग (${grahaName(kl, 'hi')}-${grahaName(tl, 'hi')} युति)`,
+          nameNe: `राजयोग (${grahaName(kl, 'ne')}-${grahaName(tl, 'ne')} युति)`,
           type: 'raj',
           description: `${kl} (Kendra lord) and ${tl} (Trikona lord) are conjunct in the ${getOrdinal(klHouse)} house, creating a powerful Raj Yoga. This indicates success, authority, fame and prosperity.`,
-          descriptionHi: `${kl} (केन्द्र स्वामी) और ${tl} (त्रिकोण स्वामी) ${klHouse}वें भाव में युति में हैं, जो शक्तिशाली राजयोग बनाता है। यह सफलता, अधिकार, प्रसिद्धि और समृद्धि का संकेत देता है।`,
+          descriptionHi: `${grahaName(kl, 'hi')} (केन्द्र स्वामी) और ${grahaName(tl, 'hi')} (त्रिकोण स्वामी) ${klHouse}वें भाव में युति में हैं, जो शक्तिशाली राजयोग बनाता है। यह सफलता, अधिकार, प्रसिद्धि और समृद्धि का संकेत देता है।`,
+          descriptionNe: `${grahaName(kl, 'ne')} (केन्द्र स्वामी) र ${grahaName(tl, 'ne')} (त्रिकोण स्वामी) ${klHouse}औं भावमा युतिमा छन्, जसले शक्तिशाली राजयोग बनाउँछ। यसले सफलता, अधिकार, प्रसिद्धि र समृद्धिको सङ्केत गर्छ।`,
           planets: [kl, tl],
           strength: isInKendra(klHouse) || isInTrikona(klHouse) ? 'strong' : 'moderate',
         });
@@ -155,10 +160,12 @@ export function detectYogas(
       if (isInTrikona(klHouse) && isInKendra(tlHouse)) {
         yogas.push({
           name: `Raj Yoga (${kl}-${tl} Exchange)`,
-          nameHi: `राजयोग (${kl}-${tl} परिवर्तन)`,
+          nameHi: `राजयोग (${grahaName(kl, 'hi')}-${grahaName(tl, 'hi')} परिवर्तन)`,
+          nameNe: `राजयोग (${grahaName(kl, 'ne')}-${grahaName(tl, 'ne')} परिवर्तन)`,
           type: 'raj',
           description: `${kl} (Kendra lord) is in a Trikona house and ${tl} (Trikona lord) is in a Kendra house, forming a Raj Yoga through exchange. This creates a powerful mutual support between fortune and action.`,
-          descriptionHi: `${kl} (केन्द्र स्वामी) त्रिकोण भाव में और ${tl} (त्रिकोण स्वामी) केन्द्र भाव में है, जो परिवर्तन द्वारा राजयोग बनाता है। यह भाग्य और कर्म के बीच शक्तिशाली पारस्परिक समर्थन बनाता है।`,
+          descriptionHi: `${grahaName(kl, 'hi')} (केन्द्र स्वामी) त्रिकोण भाव में और ${grahaName(tl, 'hi')} (त्रिकोण स्वामी) केन्द्र भाव में है, जो परिवर्तन द्वारा राजयोग बनाता है। यह भाग्य और कर्म के बीच शक्तिशाली पारस्परिक समर्थन बनाता है।`,
+          descriptionNe: `${grahaName(kl, 'ne')} (केन्द्र स्वामी) त्रिकोण भावमा र ${grahaName(tl, 'ne')} (त्रिकोण स्वामी) केन्द्र भावमा छ, जसले परिवर्तनद्वारा राजयोग बनाउँछ। यसले भाग्य र कर्मबीच बलियो पारस्परिक सहयोग सिर्जना गर्छ।`,
           planets: [kl, tl],
           strength: 'strong',
         });
@@ -173,9 +180,11 @@ export function detectYogas(
     yogas.push({
       name: 'Shubh Yoga (Benefics in Kendra)',
       nameHi: 'शुभ योग (केन्द्र में शुभ ग्रह)',
+      nameNe: 'शुभ योग (केन्द्रमा शुभ ग्रह)',
       type: 'other',
       description: `${beneficsInKendra.map(p => p.name).join(' and ')} are placed in Kendra houses (1, 4, 7, 10). Benefic planets in angular houses create general auspiciousness, giving a comfortable life, good reputation, and support from others.`,
-      descriptionHi: `${beneficsInKendra.map(p => p.name).join(' और ')} केन्द्र भावों (1, 4, 7, 10) में स्थित हैं। केन्द्र भावों में शुभ ग्रह सामान्य शुभता बनाते हैं, जो आरामदायक जीवन, अच्छी प्रतिष्ठा और दूसरों का सहयोग देते हैं।`,
+      descriptionHi: `${beneficsInKendra.map(p => grahaName(p.name, 'hi')).join(' और ')} केन्द्र भावों (1, 4, 7, 10) में स्थित हैं। केन्द्र भावों में शुभ ग्रह सामान्य शुभता बनाते हैं, जो आरामदायक जीवन, अच्छी प्रतिष्ठा और दूसरों का सहयोग देते हैं।`,
+      descriptionNe: `${beneficsInKendra.map(p => grahaName(p.name, 'ne')).join(' र ')} केन्द्र भावहरू (1, 4, 7, 10) मा रहेका छन्। केन्द्र भावमा शुभ ग्रह हुनुले सामान्य शुभता ल्याउँछ, जसले आरामदायी जीवन, राम्रो प्रतिष्ठा र अरूको सहयोग दिन्छ।`,
       planets: beneficsInKendra.map(p => p.name),
       strength: beneficsInKendra.length >= 3 ? 'strong' : 'moderate',
     });
@@ -186,10 +195,12 @@ export function detectYogas(
     if ((p.dignity === 'exalted' || p.dignity === 'peak_exalted') && p.name !== 'Rahu' && p.name !== 'Ketu') {
       yogas.push({
         name: `Uchcha Graha Yoga (${p.name} Exalted)`,
-        nameHi: `उच्च ग्रह योग (${p.name} उच्च)`,
+        nameHi: `उच्च ग्रह योग (${grahaName(p.name, 'hi')} उच्च)`,
+        nameNe: `उच्च ग्रह योग (${grahaName(p.name, 'ne')} उच्च)`,
         type: 'other',
         description: `${p.name} is in its sign of exaltation in the ${getOrdinal(p.house)} house. An exalted planet gives its best results, bringing exceptional strength to the areas it governs. This is a sign of natural talent and favorable destiny in ${p.name}'s significations.`,
-        descriptionHi: `${p.name} अपनी उच्च राशि में ${p.house}वें भाव में है। उच्च ग्रह अपने सर्वोत्तम परिणाम देता है, जो उन क्षेत्रों में असाधारण शक्ति लाता है जिन पर यह शासन करता है। यह ${p.name} के कारकत्व में प्राकृतिक प्रतिभा और अनुकूल भाग्य का संकेत है।`,
+        descriptionHi: `${grahaName(p.name, 'hi')} अपनी उच्च राशि में ${p.house}वें भाव में है। उच्च ग्रह अपने सर्वोत्तम परिणाम देता है, जो उन क्षेत्रों में असाधारण शक्ति लाता है जिन पर यह शासन करता है। यह ${grahaName(p.name, 'hi')} के कारकत्व में प्राकृतिक प्रतिभा और अनुकूल भाग्य का संकेत है।`,
+        descriptionNe: `${grahaName(p.name, 'ne')} ${p.house}औं भावमा आफ्नो उच्च राशिमा छ। उच्चको ग्रहले आफ्नो उत्तम फल दिन्छ र आफूले हेर्ने क्षेत्रहरूमा असाधारण बल ल्याउँछ। यो ${grahaName(p.name, 'ne')}का कारकत्वहरूमा जन्मजात प्रतिभा र अनुकूल भाग्यको सङ्केत हो।`,
         planets: [p.name],
         strength: isInKendra(p.house) ? 'strong' : 'moderate',
       });
@@ -201,10 +212,12 @@ export function detectYogas(
     if ((p.dignity === 'own_sign' || p.dignity === 'moolatrikona') && p.name !== 'Rahu' && p.name !== 'Ketu') {
       yogas.push({
         name: `Swa-Griha Yoga (${p.name} in Own Sign)`,
-        nameHi: `स्वगृह योग (${p.name} स्वराशि में)`,
+        nameHi: `स्वगृह योग (${grahaName(p.name, 'hi')} स्वराशि में)`,
+        nameNe: `स्वगृह योग (${grahaName(p.name, 'ne')} स्वराशिमा)`,
         type: 'other',
         description: `${p.name} is in its own sign in the ${getOrdinal(p.house)} house. A planet in its own sign is comfortable and confident, delivering reliable positive results. It strengthens the house it occupies and the houses it rules.`,
-        descriptionHi: `${p.name} ${p.house}वें भाव में अपनी स्वराशि में है। अपनी राशि में ग्रह सहज और आत्मविश्वासी होता है, विश्वसनीय सकारात्मक परिणाम देता है। यह उस भाव को और जिन भावों पर शासन करता है उन्हें मजबूत करता है।`,
+        descriptionHi: `${grahaName(p.name, 'hi')} ${p.house}वें भाव में अपनी स्वराशि में है। अपनी राशि में ग्रह सहज और आत्मविश्वासी होता है, विश्वसनीय सकारात्मक परिणाम देता है। यह उस भाव को और जिन भावों पर शासन करता है उन्हें मजबूत करता है।`,
+        descriptionNe: `${grahaName(p.name, 'ne')} ${p.house}औं भावमा आफ्नै राशिमा छ। आफ्नै राशिमा रहेको ग्रह सहज र आत्मविश्वासी हुन्छ र भरपर्दो सकारात्मक फल दिन्छ। यसले आफू रहेको भाव र आफूले स्वामित्व राख्ने भावहरूलाई बलियो बनाउँछ।`,
         planets: [p.name],
         strength: isInKendra(p.house) || isInTrikona(p.house) ? 'moderate' : 'mild',
       });
@@ -222,9 +235,11 @@ export function detectYogas(
       yogas.push({
         name: 'Gajakesari Yoga',
         nameHi: 'गजकेसरी योग',
+        nameNe: 'गजकेसरी योग',
         type: 'other',
         description: 'Jupiter is in a Kendra (1st, 4th, 7th or 10th) from the Moon, forming Gajakesari Yoga. This is one of the most auspicious yogas, bestowing wisdom, wealth, good reputation, and positions of authority. The native commands respect and leads a prosperous life.',
         descriptionHi: 'गुरु चंद्रमा से केन्द्र (1, 4, 7 या 10वें) भाव में स्थित है, जो गजकेसरी योग बनाता है। यह सबसे शुभ योगों में से एक है, जो बुद्धि, धन, अच्छी प्रतिष्ठा और अधिकार के पद प्रदान करता है। जातक सम्मान प्राप्त करता है और समृद्ध जीवन जीता है।',
+        descriptionNe: 'बृहस्पति चन्द्रमाबाट केन्द्र (1, 4, 7 वा 10औं) भावमा रहेकाले गजकेसरी योग बनेको छ। यो सबैभन्दा शुभ योगहरूमध्ये एक हो, जसले बुद्धि, धन, राम्रो प्रतिष्ठा र अधिकारको पद दिन्छ। जातकले सम्मान पाउँछ र समृद्ध जीवन बिताउँछ।',
         planets: ['Jupiter', 'Moon'],
         strength: 'strong',
       });
@@ -243,9 +258,11 @@ export function detectYogas(
       yogas.push({
         name: 'Budh-Aditya Yoga',
         nameHi: 'बुधादित्य योग',
+        nameNe: 'बुधादित्य योग',
         type: 'other',
         description: 'Sun and Mercury are conjunct without Mercury being combust, forming Budh-Aditya Yoga. This grants sharp intelligence, excellent communication skills, success in education and intellectual pursuits. The native is learned, articulate and respected in scholarly circles.',
         descriptionHi: 'सूर्य और बुध बिना बुध के अस्त हुए युति में हैं, जो बुधादित्य योग बनाता है। यह तीव्र बुद्धि, उत्कृष्ट संवाद कौशल, शिक्षा और बौद्धिक कार्यों में सफलता प्रदान करता है। जातक विद्वान, वाक्पटु और विद्वत् मंडल में सम्मानित होता है।',
+        descriptionNe: 'सूर्य र बुध युतिमा छन् र बुध अस्त पनि भएको छैन, जसले बुधादित्य योग बनाउँछ। यसले तीक्ष्ण बुद्धि, उत्कृष्ट सञ्चार सीप र शिक्षा तथा बौद्धिक कार्यमा सफलता दिन्छ। जातक विद्वान्, वाक्पटु र विद्वत् वृत्तमा सम्मानित हुन्छ।',
         planets: ['Sun', 'Mercury'],
         strength: 'moderate',
       });
@@ -260,9 +277,11 @@ export function detectYogas(
     yogas.push({
       name: 'Ruchaka Yoga',
       nameHi: 'रुचक योग',
+      nameNe: 'रुचक योग',
       type: 'pancha_mahapurusha',
       description: 'Mars is in its own or exalted sign in a Kendra house, forming Ruchaka Yoga — one of the five Pancha Mahapurusha Yogas. The native is brave, commanding, strong-bodied, leader-like, and achieves success through courage and determination. Government and military positions are favored.',
       descriptionHi: 'मंगल अपनी स्वराशि या उच्च राशि में केन्द्र भाव में स्थित है, जो रुचक योग बनाता है — पंच महापुरुष योगों में से एक। जातक वीर, प्रभावशाली, बलवान, नेतृत्व गुणों वाला होता है और साहस व दृढ़ संकल्प से सफलता प्राप्त करता है। सरकारी और सैन्य पद अनुकूल हैं।',
+      descriptionNe: 'मंगल केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले रुचक योग बनेको छ — पञ्च महापुरुष योगहरूमध्ये एक। जातक वीर, प्रभावशाली, बलियो शरीर भएको र नेतृत्वदायी हुन्छ, अनि साहस र दृढ सङ्कल्पबाट सफलता प्राप्त गर्छ। सरकारी र सैनिक पद अनुकूल हुन्छन्।',
       planets: ['Mars'],
       strength: 'strong',
     });
@@ -274,9 +293,11 @@ export function detectYogas(
     yogas.push({
       name: 'Bhadra Yoga',
       nameHi: 'भद्र योग',
+      nameNe: 'भद्र योग',
       type: 'pancha_mahapurusha',
       description: 'Mercury is in its own or exalted sign in a Kendra house, forming Bhadra Yoga. The native is highly intelligent, eloquent, skilled in commerce and arts, learned in scriptures, and attains fame through intellect and communication.',
       descriptionHi: 'बुध अपनी स्वराशि या उच्च राशि में केन्द्र भाव में स्थित है, जो भद्र योग बनाता है। जातक अत्यंत बुद्धिमान, वाक्पटु, वाणिज्य और कला में कुशल, शास्त्रों में पारंगत होता है और बुद्धि तथा संवाद से प्रसिद्धि प्राप्त करता है।',
+      descriptionNe: 'बुध केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले भद्र योग बनेको छ। जातक अत्यन्त बुद्धिमान्, वाक्पटु, व्यापार र कलामा दक्ष तथा शास्त्रमा पारङ्गत हुन्छ, अनि बुद्धि र सञ्चारबाट प्रसिद्धि पाउँछ।',
       planets: ['Mercury'],
       strength: 'strong',
     });
@@ -288,9 +309,11 @@ export function detectYogas(
     yogas.push({
       name: 'Hamsa Yoga',
       nameHi: 'हंस योग',
+      nameNe: 'हंस योग',
       type: 'pancha_mahapurusha',
       description: 'Jupiter is in its own or exalted sign in a Kendra house, forming Hamsa Yoga — the most auspicious of Pancha Mahapurusha Yogas. The native is righteous, learned, spiritually inclined, charitable, well-respected, and lives a long prosperous life blessed with wisdom.',
       descriptionHi: 'गुरु अपनी स्वराशि या उच्च राशि में केन्द्र भाव में स्थित है, जो हंस योग बनाता है — पंच महापुरुष योगों में सबसे शुभ। जातक धर्मात्मा, विद्वान, आध्यात्मिक, दानशील, सम्मानित होता है और ज्ञान से युक्त दीर्घ समृद्ध जीवन जीता है।',
+      descriptionNe: 'बृहस्पति केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले हंस योग बनेको छ — पञ्च महापुरुष योगहरूमध्ये सबैभन्दा शुभ। जातक धर्मात्मा, विद्वान्, आध्यात्मिक, दानी र सम्मानित हुन्छ, अनि ज्ञानले युक्त दीर्घ र समृद्ध जीवन बिताउँछ।',
       planets: ['Jupiter'],
       strength: 'strong',
     });
@@ -302,9 +325,11 @@ export function detectYogas(
     yogas.push({
       name: 'Malavya Yoga',
       nameHi: 'मालव्य योग',
+      nameNe: 'मालव्य योग',
       type: 'pancha_mahapurusha',
       description: 'Venus is in its own or exalted sign in a Kendra house, forming Malavya Yoga. The native enjoys luxuries, comforts, beautiful spouse, vehicles, artistic talents, and leads a life full of pleasures and material prosperity.',
       descriptionHi: 'शुक्र अपनी स्वराशि या उच्च राशि में केन्द्र भाव में स्थित है, जो मालव्य योग बनाता है। जातक विलासिता, सुख-सुविधाओं, सुंदर जीवनसाथी, वाहनों, कलात्मक प्रतिभा का आनंद लेता है और भोग-विलास तथा भौतिक समृद्धि से परिपूर्ण जीवन जीता है।',
+      descriptionNe: 'शुक्र केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले मालव्य योग बनेको छ। जातकले विलासिता, सुखसुविधा, सुन्दर जीवनसाथी, सवारीसाधन र कलात्मक प्रतिभाको आनन्द लिन्छ, अनि भोग र भौतिक समृद्धिले भरिएको जीवन बिताउँछ।',
       planets: ['Venus'],
       strength: 'strong',
     });
@@ -316,9 +341,11 @@ export function detectYogas(
     yogas.push({
       name: 'Shasha Yoga',
       nameHi: 'शश योग',
+      nameNe: 'शश योग',
       type: 'pancha_mahapurusha',
       description: 'Saturn is in its own or exalted sign in a Kendra house, forming Shasha Yoga. The native rises to power through discipline, hard work and perseverance. Success comes in politics, administration, law, and positions requiring authority over large organizations.',
       descriptionHi: 'शनि अपनी स्वराशि या उच्च राशि में केन्द्र भाव में स्थित है, जो शश योग बनाता है। जातक अनुशासन, कड़ी मेहनत और दृढ़ता से सत्ता प्राप्त करता है। राजनीति, प्रशासन, कानून और बड़े संगठनों पर अधिकार रखने वाले पदों में सफलता मिलती है।',
+      descriptionNe: 'शनि केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले शश योग बनेको छ। जातक अनुशासन, कडा परिश्रम र धैर्यबाट शक्तिमा पुग्छ। राजनीति, प्रशासन, कानुन र ठूला सङ्गठनमा अधिकार चाहिने पदहरूमा सफलता मिल्छ।',
       planets: ['Saturn'],
       strength: 'strong',
     });
@@ -336,9 +363,11 @@ export function detectYogas(
     yogas.push({
       name: 'Dhana Yoga',
       nameHi: 'धन योग',
+      nameNe: 'धन योग',
       type: 'dhan',
       description: `The lords of the 2nd house (${lord2}) and 11th house (${lord11}) are conjunct, forming a Dhana Yoga. This is a strong indicator of wealth accumulation. The native earns well through the significations of the house where these planets are placed.`,
-      descriptionHi: `द्वितीय भाव (${lord2}) और एकादश भाव (${lord11}) के स्वामी युति में हैं, जो धन योग बनाता है। यह धन संचय का प्रबल संकेत है। जातक उस भाव के कारकत्व से अच्छी कमाई करता है जहां ये ग्रह स्थित हैं।`,
+      descriptionHi: `द्वितीय भाव (${grahaName(lord2, 'hi')}) और एकादश भाव (${grahaName(lord11, 'hi')}) के स्वामी युति में हैं, जो धन योग बनाता है। यह धन संचय का प्रबल संकेत है। जातक उस भाव के कारकत्व से अच्छी कमाई करता है जहां ये ग्रह स्थित हैं।`,
+      descriptionNe: `दोस्रो भाव (${grahaName(lord2, 'ne')}) र एघारौं भाव (${grahaName(lord11, 'ne')}) का स्वामी युतिमा छन्, जसले धन योग बनाउँछ। यो धन सञ्चयको बलियो सङ्केत हो। जातकले यी ग्रह रहेको भावका कारकत्वबाट राम्रो आम्दानी गर्छ।`,
       planets: [lord2, lord11],
       strength: 'moderate',
     });
@@ -352,9 +381,11 @@ export function detectYogas(
     yogas.push({
       name: 'Lakshmi Yoga',
       nameHi: 'लक्ष्मी योग',
+      nameNe: 'लक्ष्मी योग',
       type: 'dhan',
       description: `The 9th lord (${lord9}) is placed in a Kendra house in its own or exalted sign, forming Lakshmi Yoga. This bestows great fortune, wealth, prosperity and divine blessings. The native is highly fortunate and lives a comfortable, affluent life.`,
-      descriptionHi: `नवम स्वामी (${lord9}) केन्द्र भाव में अपनी स्वराशि या उच्च राशि में स्थित है, जो लक्ष्मी योग बनाता है। यह महान भाग्य, धन, समृद्धि और दैवीय आशीर्वाद प्रदान करता है। जातक अत्यंत भाग्यशाली है और आरामदायक, संपन्न जीवन जीता है।`,
+      descriptionHi: `नवम स्वामी (${grahaName(lord9, 'hi')}) केन्द्र भाव में अपनी स्वराशि या उच्च राशि में स्थित है, जो लक्ष्मी योग बनाता है। यह महान भाग्य, धन, समृद्धि और दैवीय आशीर्वाद प्रदान करता है। जातक अत्यंत भाग्यशाली है और आरामदायक, संपन्न जीवन जीता है।`,
+      descriptionNe: `नवौं भावको स्वामी (${grahaName(lord9, 'ne')}) केन्द्र भावमा आफ्नै वा उच्च राशिमा रहेकाले लक्ष्मी योग बनेको छ। यसले ठूलो भाग्य, धन, समृद्धि र दैवी कृपा दिन्छ। जातक अत्यन्त भाग्यमानी हुन्छ र आरामदायी, सम्पन्न जीवन बिताउँछ।`,
       planets: [lord9],
       strength: 'strong',
     });
@@ -383,9 +414,11 @@ export function detectYogas(
         yogas.push({
           name: 'Viparita Raj Yoga',
           nameHi: 'विपरीत राजयोग',
+          nameNe: 'विपरीत राजयोग',
           type: 'raj',
           description: `The lord of the ${getOrdinal(a.from)} house (${a.lord}) and lord of the ${getOrdinal(b.from)} house (${b.lord}) are placed in Dusthana houses, forming Viparita Raj Yoga. This yoga turns adversity into advantage — the native gains success through unconventional or difficult circumstances.`,
-          descriptionHi: `${a.from}वें भाव के स्वामी (${a.lord}) और ${b.from}वें भाव के स्वामी (${b.lord}) दुस्थान भावों में स्थित हैं, जो विपरीत राजयोग बनाता है। यह योग विपरीत परिस्थितियों को लाभ में बदलता है — जातक अपरंपरागत या कठिन परिस्थितियों से सफलता प्राप्त करता है।`,
+          descriptionHi: `${a.from}वें भाव के स्वामी (${grahaName(a.lord, 'hi')}) और ${b.from}वें भाव के स्वामी (${grahaName(b.lord, 'hi')}) दुस्थान भावों में स्थित हैं, जो विपरीत राजयोग बनाता है। यह योग विपरीत परिस्थितियों को लाभ में बदलता है — जातक अपरंपरागत या कठिन परिस्थितियों से सफलता प्राप्त करता है।`,
+          descriptionNe: `${a.from}औं भावको स्वामी (${grahaName(a.lord, 'ne')}) र ${b.from}औं भावको स्वामी (${grahaName(b.lord, 'ne')}) दुस्थान भावमा रहेकाले विपरीत राजयोग बनेको छ। यो योगले प्रतिकूलतालाई लाभमा बदल्छ — जातकले असामान्य वा कठिन परिस्थितिबाट सफलता प्राप्त गर्छ।`,
           planets: [a.lord, b.lord],
           strength: 'moderate',
         });
@@ -405,9 +438,11 @@ export function detectYogas(
     yogas.push({
       name: 'Sunafa Yoga',
       nameHi: 'सुनफा योग',
+      nameNe: 'सुनफा योग',
       type: 'chandra',
       description: `${planetsIn2FromMoon.map(p => p.name).join(', ')} is in the 2nd house from Moon, forming Sunafa Yoga. This gives self-earned wealth, good intelligence, and a respected position in society. The native is independent and achieves success through own efforts.`,
-      descriptionHi: `${planetsIn2FromMoon.map(p => p.name).join(', ')} चंद्रमा से दूसरे भाव में स्थित है, जो सुनफा योग बनाता है। यह स्वयं अर्जित धन, अच्छी बुद्धि और समाज में सम्मानित स्थान देता है। जातक स्वतंत्र है और अपने प्रयासों से सफलता प्राप्त करता है।`,
+      descriptionHi: `${planetsIn2FromMoon.map(p => grahaName(p.name, 'hi')).join(', ')} चंद्रमा से दूसरे भाव में स्थित है, जो सुनफा योग बनाता है। यह स्वयं अर्जित धन, अच्छी बुद्धि और समाज में सम्मानित स्थान देता है। जातक स्वतंत्र है और अपने प्रयासों से सफलता प्राप्त करता है।`,
+      descriptionNe: `${planetsIn2FromMoon.map(p => grahaName(p.name, 'ne')).join(', ')} चन्द्रमाबाट दोस्रो भावमा छ, जसले सुनफा योग बनाउँछ। यसले आफैंले आर्जन गरेको धन, राम्रो बुद्धि र समाजमा सम्मानित स्थान दिन्छ। जातक स्वतन्त्र हुन्छ र आफ्नै प्रयासबाट सफलता प्राप्त गर्छ।`,
       planets: planetsIn2FromMoon.map(p => p.name),
       strength: 'mild',
     });
@@ -422,9 +457,11 @@ export function detectYogas(
     yogas.push({
       name: 'Anafa Yoga',
       nameHi: 'अनफा योग',
+      nameNe: 'अनफा योग',
       type: 'chandra',
       description: `${planetsIn12FromMoon.map(p => p.name).join(', ')} is in the 12th house from Moon, forming Anafa Yoga. This gives good health, pleasing personality, fame and virtue. The native is well-spoken and respected.`,
-      descriptionHi: `${planetsIn12FromMoon.map(p => p.name).join(', ')} चंद्रमा से बारहवें भाव में स्थित है, जो अनफा योग बनाता है। यह अच्छा स्वास्थ्य, आकर्षक व्यक्तित्व, प्रसिद्धि और सद्गुण देता है। जातक वाक्पटु और सम्मानित होता है।`,
+      descriptionHi: `${planetsIn12FromMoon.map(p => grahaName(p.name, 'hi')).join(', ')} चंद्रमा से बारहवें भाव में स्थित है, जो अनफा योग बनाता है। यह अच्छा स्वास्थ्य, आकर्षक व्यक्तित्व, प्रसिद्धि और सद्गुण देता है। जातक वाक्पटु और सम्मानित होता है।`,
+      descriptionNe: `${planetsIn12FromMoon.map(p => grahaName(p.name, 'ne')).join(', ')} चन्द्रमाबाट बाह्रौं भावमा छ, जसले अनफा योग बनाउँछ। यसले राम्रो स्वास्थ्य, मनमोहक व्यक्तित्व, प्रसिद्धि र सद्गुण दिन्छ। जातक मिठो बोल्ने र सम्मानित हुन्छ।`,
       planets: planetsIn12FromMoon.map(p => p.name),
       strength: 'mild',
     });
@@ -440,10 +477,12 @@ export function detectYogas(
       if (isInKendra(dispositorHouse)) {
         yogas.push({
           name: `Neech Bhanga Raj Yoga (${p.name})`,
-          nameHi: `नीच भंग राजयोग (${p.name})`,
+          nameHi: `नीच भंग राजयोग (${grahaName(p.name, 'hi')})`,
+          nameNe: `नीच भङ्ग राजयोग (${grahaName(p.name, 'ne')})`,
           type: 'raj',
           description: `${p.name} is debilitated but its dispositor ${dispositor} is in a Kendra, cancelling the debilitation and forming Neech Bhanga Raj Yoga. This turns weakness into extraordinary strength — the native rises from humble or challenging beginnings to great heights.`,
-          descriptionHi: `${p.name} नीच है लेकिन इसका स्वामी ${dispositor} केन्द्र में है, जो नीच भंग राजयोग बनाता है। यह कमजोरी को असाधारण शक्ति में बदलता है — जातक विनम्र या चुनौतीपूर्ण शुरुआत से महान ऊंचाइयों तक पहुंचता है।`,
+          descriptionHi: `${grahaName(p.name, 'hi')} नीच है लेकिन इसका स्वामी ${grahaName(dispositor, 'hi')} केन्द्र में है, जो नीच भंग राजयोग बनाता है। यह कमजोरी को असाधारण शक्ति में बदलता है — जातक विनम्र या चुनौतीपूर्ण शुरुआत से महान ऊंचाइयों तक पहुंचता है।`,
+          descriptionNe: `${grahaName(p.name, 'ne')} नीचको छ तर यसको राशिस्वामी ${grahaName(dispositor, 'ne')} केन्द्रमा रहेकाले नीचत्व भङ्ग भई नीच भङ्ग राजयोग बनेको छ। यसले कमजोरीलाई असाधारण शक्तिमा बदल्छ — जातक साधारण वा कठिन सुरुवातबाट ठूलो उचाइमा पुग्छ।`,
           planets: [p.name, dispositor],
           strength: 'strong',
         });

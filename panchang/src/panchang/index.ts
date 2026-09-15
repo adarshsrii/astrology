@@ -525,12 +525,14 @@ export class Panchang {
     }
 
     private calculateAyana(sunLongitude: number): { drik: string; vedic: string } {
-        // This is a simplified calculation. A more accurate calculation would require more complex logic.
-        if (sunLongitude > 180) {
-            return { drik: 'Dakshinayana', vedic: 'Dakshinayana' };
-        } else {
-            return { drik: 'Uttarayana', vedic: 'Uttarayana' };
-        }
+        // Ayana turns at the solstices, not at 0/180. Uttarayana is the Sun's northward
+        // half: from Makara 0 (270) through Mesha to Karka 0 (90). Dakshinayana is the
+        // rest. The old 0-180 split was 90 degrees out and reported Uttarayana through
+        // the whole of Simha and Kanya. sunLongitude here is sidereal (nirayana).
+        const lon = ((sunLongitude % 360) + 360) % 360;
+        return (lon >= 270 || lon < 90)
+            ? { drik: 'Uttarayana', vedic: 'Uttarayana' }
+            : { drik: 'Dakshinayana', vedic: 'Dakshinayana' };
     }
 
     private calculateMadhyahna(sunrise: Date | null, sunset: Date | null): Date | null {

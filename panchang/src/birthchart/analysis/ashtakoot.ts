@@ -7,6 +7,7 @@
  */
 
 import { NATURAL_FRIENDSHIPS } from './friendships';
+import { getSignLord } from '../core/lords';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,22 +67,9 @@ const RASHI_VARNA: number[] = [
 /**
  * Rashi lord — used by Graha Maitri, which compares the lords of the two MOON
  * SIGNS. The old code compared nakshatra lords, a different quantity entirely.
- * Index = rashiNumber - 1
+ * The table itself now lives in core/lords.ts (getSignLord); it used to be a
+ * second private copy here, free to drift from the one in yogas.ts.
  */
-const RASHI_LORD: string[] = [
-  /* 1  Mesh      */ 'Mars',
-  /* 2  Vrishabh  */ 'Venus',
-  /* 3  Mithun    */ 'Mercury',
-  /* 4  Karka     */ 'Moon',
-  /* 5  Simha     */ 'Sun',
-  /* 6  Kanya     */ 'Mercury',
-  /* 7  Tula      */ 'Venus',
-  /* 8  Vrischik  */ 'Mars',
-  /* 9  Dhanu     */ 'Jupiter',
-  /* 10 Makar     */ 'Saturn',
-  /* 11 Kumbha    */ 'Saturn',
-  /* 12 Meen      */ 'Jupiter',
-];
 
 /**
  * Vasya (वश्य) — Dominance/attraction
@@ -301,8 +289,8 @@ function calcYoni(groom: MatchInput, bride: MatchInput): number {
 function calcGrahaMaitri(groom: MatchInput, bride: MatchInput): number {
   // Graha Maitri compares the lords of the two Moon SIGNS. Using
   // nakshatraLord here compared a different quantity and scored most pairs wrong.
-  const gl = RASHI_LORD[groom.rashiNumber - 1];
-  const bl = RASHI_LORD[bride.rashiNumber - 1];
+  const gl: string = getSignLord(groom.rashiNumber);
+  const bl: string = getSignLord(bride.rashiNumber);
 
   if (gl === bl) return 5;
 

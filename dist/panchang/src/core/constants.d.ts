@@ -24,7 +24,7 @@ export declare const RASHIS: Array<{
     lord: string;
     element: string;
 }>;
-export type Lang = 'en' | 'hi';
+export type Lang = 'en' | 'hi' | 'ne';
 export declare const TITHI_NAMES_HI: string[];
 export declare const NAKSHATRAS_HI: Array<{
     name: string;
@@ -49,3 +49,35 @@ export declare const RITU_HI: Record<string, {
     vedic: string;
     english: string;
 }>;
+export declare const TITHI_NAMES_NE: string[];
+export declare const NAKSHATRAS_NE: Array<{
+    name: string;
+    lord: string;
+    deity: string;
+}>;
+export declare const YOGA_NAMES_NE: string[];
+export declare const KARANA_NAMES_REPEATING_NE: string[];
+export declare const KARANA_NAMES_FIXED_NE: string[];
+export declare const RASHIS_NE: Array<{
+    name: string;
+    sanskritName: string;
+    lord: string;
+    element: string;
+}>;
+export declare const VARA_NAMES_NE: string[];
+export declare const MOON_PHASES_NE: Record<string, string>;
+export declare const PAKSHA_NE: Record<string, string>;
+export declare const AYANA_NE: Record<string, string>;
+export declare const RITU_NE: Record<string, {
+    vedic: string;
+    english: string;
+}>;
+export declare const LUNAR_MONTHS_NE: string[];
+export declare const PLANETS_HI: Record<string, string>;
+export declare const PLANETS_NE: Record<string, string>;
+/**
+ * English graha name -> localized name. Falls back to the English name for an
+ * unrecognised planet and for lang 'en', so an unexpected value prints
+ * something readable instead of `undefined`.
+ */
+export declare function grahaName(englishName: string, lang: Lang): string;

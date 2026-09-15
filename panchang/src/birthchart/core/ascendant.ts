@@ -123,7 +123,7 @@ const NAKSHATRA_DATA: Array<{ name: string; lord: string }> = [
   { name: 'Vishakha',          lord: 'Jupiter' },
   { name: 'Anuradha',          lord: 'Saturn' },
   { name: 'Jyeshtha',          lord: 'Mercury' },
-  { name: 'Mula',              lord: 'Ketu' },
+  { name: 'Moola',             lord: 'Ketu' },
   { name: 'Purva Ashadha',     lord: 'Venus' },
   { name: 'Uttara Ashadha',    lord: 'Sun' },
   { name: 'Shravana',          lord: 'Moon' },

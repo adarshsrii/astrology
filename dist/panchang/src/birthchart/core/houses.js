@@ -4,7 +4,7 @@
  * Assign signs to houses and planets to houses.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = void 0;
+exports.calculateSudarshanaChakra = exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = void 0;
 const constants_1 = require("./constants");
 /**
  * Calculate the 12 houses given the lagna sign and house system.
@@ -74,3 +74,33 @@ function populateHousePlanets(houses, planets, assignment) {
     return houses;
 }
 exports.populateHousePlanets = populateHousePlanets;
+/**
+ * Sudarshana Chakra — the same chart read three times: from the Lagna, from the
+ * Moon's sign (Chandra lagna) and from the Sun's sign (Surya lagna). A result
+ * confirmed in all three readings is the classical test of a strong promise.
+ *
+ * ponytail: whole-sign only, and no interpretation — this returns the three
+ * house sets and stops. Reading them is the report's job.
+ */
+function calculateSudarshanaChakra(planets, lagnaSignNumber) {
+    // ponytail: Moon/Sun come out of the same planets array the caller already has,
+    // so there is nothing extra to pass in. Falling back to the lagna sign keeps a
+    // partial planet list from throwing; a real chart always carries both.
+    const signOf = (name) => planets.find(p => p.name === name)?.signNumber ?? lagnaSignNumber;
+    const view = (reference, referenceSignNumber) => {
+        const houses = calculateHouses(referenceSignNumber, 'whole_sign');
+        const assignment = assignPlanetsToHouses(planets, referenceSignNumber, 'whole_sign');
+        return {
+            reference,
+            referenceSignNumber,
+            referenceSignName: constants_1.SIGN_NAMES[referenceSignNumber] || 'Unknown',
+            houses: populateHousePlanets(houses, planets, assignment),
+        };
+    };
+    return {
+        lagna: view('lagna', lagnaSignNumber),
+        moon: view('moon', signOf('Moon')),
+        sun: view('sun', signOf('Sun')),
+    };
+}
+exports.calculateSudarshanaChakra = calculateSudarshanaChakra;

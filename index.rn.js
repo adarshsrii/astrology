@@ -26,8 +26,15 @@ const { calculateYoga } = require('./dist/panchang/src/core/yoga');
 const { calculateKarana } = require('./dist/panchang/src/core/karana');
 const { calculateRashi } = require('./dist/panchang/src/core/rashi');
 
+// Shared graha-name map (the ONE table — see panchang/src/core/constants.ts)
+const { grahaName, PLANETS_HI, PLANETS_NE } = require('./dist/panchang/src/core/constants');
+
 // Birth Chart (compiled JS, swisseph via react-native-swisseph bridge)
 const { calculateBirthChart } = require('./dist/panchang/src/birthchart/birthchart');
+
+// House lordship + Sudarshana Chakra (core building blocks for report sections)
+const { SIGN_LORDS, getSignLord, getSignName, getHouseLords } = require('./dist/panchang/src/birthchart/core/lords');
+const { calculateHouses, assignPlanetsToHouses, populateHousePlanets, calculateSudarshanaChakra } = require('./dist/panchang/src/birthchart/core/houses');
 
 // Birth Chart Analysis
 const { calculateTattvaBalance } = require('./dist/panchang/src/birthchart/analysis/tattva');
@@ -48,7 +55,7 @@ const { calculateShodashvarga } = require('./dist/panchang/src/birthchart/divisi
 
 // Recommendations
 const { getNameSuggestions } = require('./dist/panchang/src/birthchart/recommendations/names');
-const { getRemedies } = require('./dist/panchang/src/birthchart/recommendations/remedies');
+const { getRemedies, getPlanetRemedy, PLANET_DIRECTIONS, getPlanetDirection } = require('./dist/panchang/src/birthchart/recommendations/remedies');
 
 // Transit (Gochar) — Daily Horoscope
 const { calculateDailyHoroscope, getDailyHoroscope, calculateSadeSatiPeriod } = require('./dist/panchang/src/transit/index');
@@ -76,8 +83,23 @@ module.exports = {
   calculateKarana,
   calculateRashi,
 
+  // Graha names
+  grahaName,
+  PLANETS_HI,
+  PLANETS_NE,
+
   // Birth Chart
   calculateBirthChart,
+
+  // Houses, lordship, Sudarshana Chakra
+  calculateHouses,
+  assignPlanetsToHouses,
+  populateHousePlanets,
+  SIGN_LORDS,
+  getSignLord,
+  getSignName,
+  getHouseLords,
+  calculateSudarshanaChakra,
 
   // Analysis
   calculateTattvaBalance,
@@ -102,6 +124,9 @@ module.exports = {
   // Recommendations
   getNameSuggestions,
   getRemedies,
+  getPlanetRemedy,
+  PLANET_DIRECTIONS,
+  getPlanetDirection,
 
   // Transit — Daily Horoscope
   calculateDailyHoroscope,

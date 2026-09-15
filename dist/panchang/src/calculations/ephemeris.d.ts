@@ -35,6 +35,14 @@ export declare class Ephemeris {
      */
     getSpecificAyanamsa(date: Date, ayanamsa_id: number | string): AyanamsaInfo | null;
     private get_fallback_ayanamsa;
+    /**
+     * Sunrise / sunset from the Swiss Ephemeris the rest of this class already uses.
+     * Replaces a hand-rolled NOAA approximation whose day-of-year term evaluated to
+     * 675536 instead of 253, which corrupted the declination and produced a negative
+     * dinamana. -0.833 deg is the standard rise/set altitude: solar semidiameter plus
+     * mean atmospheric refraction.
+     */
+    private solarEvent;
     calculateSunrise(date: Date, location: Location): Date | null;
     private calculate_sun_altitude;
     calculateMoonrise(date: Date, location: Location): Date | null;

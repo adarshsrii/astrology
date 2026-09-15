@@ -17,6 +17,18 @@ import {
   PAKSHA_HI,
   AYANA_HI,
   RITU_HI,
+  TITHI_NAMES_NE,
+  NAKSHATRAS_NE,
+  YOGA_NAMES_NE,
+  KARANA_NAMES_REPEATING_NE,
+  KARANA_NAMES_FIXED_NE,
+  RASHIS_NE,
+  VARA_NAMES_NE,
+  MOON_PHASES_NE,
+  PAKSHA_NE,
+  AYANA_NE,
+  RITU_NE,
+  LUNAR_MONTHS_NE,
 } from './core/constants';
 import { PanchangResult, Location } from './types';
 import { calculateMuhurats } from './timings/muhurat';
@@ -121,6 +133,24 @@ export function calculateFullPanchang(
     ? new Date(date + 'T12:00:00')
     : date;
   const location: Location = { latitude, longitude, timezone };
+
+  // ── Localized name tables ─────────────────────────────────────────────────
+  // 'ne' gets its own slot-for-slot tables (see core/constants.ts). The
+  // selection rule is unchanged: anything that is not 'hi' or 'ne' still falls
+  // through to English, so an unrecognised lang behaves exactly as before.
+  const localized = lang === 'hi' || lang === 'ne';
+  const isNe = lang === 'ne';
+  const L_TITHI   = isNe ? TITHI_NAMES_NE              : TITHI_NAMES_HI;
+  const L_NAK     = isNe ? NAKSHATRAS_NE               : NAKSHATRAS_HI;
+  const L_YOGA    = isNe ? YOGA_NAMES_NE               : YOGA_NAMES_HI;
+  const L_KAR_REP = isNe ? KARANA_NAMES_REPEATING_NE   : KARANA_NAMES_REPEATING_HI;
+  const L_KAR_FIX = isNe ? KARANA_NAMES_FIXED_NE       : KARANA_NAMES_FIXED_HI;
+  const L_RASHI   = isNe ? RASHIS_NE                   : RASHIS_HI;
+  const L_VARA    = isNe ? VARA_NAMES_NE               : VARA_NAMES_HI;
+  const L_MOONPH  = isNe ? MOON_PHASES_NE              : MOON_PHASES_HI;
+  const L_PAKSHA  = isNe ? PAKSHA_NE                   : PAKSHA_HI;
+  const L_AYANA   = isNe ? AYANA_NE                    : AYANA_HI;
+  const L_RITU    = isNe ? RITU_NE                     : RITU_HI;
 
   // Helper: compute sidereal sun/moon longitudes for a given Date
   function computeLongitudes(dt: Date, ayan: number): { sunLon: number; moonLon: number } {
@@ -437,7 +467,8 @@ export function calculateFullPanchang(
   // Simplification: Since both systems often agree on the name for most
   // of the month, and the Sun-sign based calculation gives Amanta directly,
   // we use Amanta as the primary Hindu month (matches Drik Panchang).
-  const hinduMonth = lang === 'hi' ? LUNAR_MONTHS_HI[amantaIndex] : LUNAR_MONTHS[amantaIndex];
+  const L_MONTHS = isNe ? LUNAR_MONTHS_NE : LUNAR_MONTHS_HI;
+  const hinduMonth = localized ? L_MONTHS[amantaIndex] : LUNAR_MONTHS[amantaIndex];
   const hinduMonthAmanta = hinduMonth;
 
   // Use the date string to determine weekday (timezone-independent)
@@ -445,7 +476,7 @@ export function calculateFullPanchang(
   const varaDate = new Date(varaDateStr + 'T12:00:00Z'); // Noon UTC — safe for any timezone
   const varaDay = varaDate.getUTCDay();
   const vara = {
-    name: lang === 'hi' ? VARA_NAMES_HI[varaDay] : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDay],
+    name: localized ? L_VARA[varaDay] : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][varaDay],
     number: varaDay,
   };
 
@@ -484,36 +515,36 @@ export function calculateFullPanchang(
 
   // ── Localization helpers ──────────────────────────────────────────────────
   function locTithiName(name: string, idx: number): string {
-    if (lang !== 'hi') return name;
-    return TITHI_NAMES_HI[idx] ?? name;
+    if (!localized) return name;
+    return L_TITHI[idx] ?? name;
   }
   function locNakName(n: { name: string; number: number; lord: string; deity: string }): { name: string; lord: string; deity: string } {
-    if (lang !== 'hi') return n;
-    const hi = NAKSHATRAS_HI[n.number - 1];
-    return hi ? { name: hi.name, lord: hi.lord, deity: hi.deity } : n;
+    if (!localized) return n;
+    const t = L_NAK[n.number - 1];
+    return t ? { name: t.name, lord: t.lord, deity: t.deity } : n;
   }
   function locYogaName(name: string, idx: number): string {
-    if (lang !== 'hi') return name;
-    return YOGA_NAMES_HI[idx - 1] ?? name;
+    if (!localized) return name;
+    return L_YOGA[idx - 1] ?? name;
   }
   function locKaranaName(name: string): string {
-    if (lang !== 'hi') return name;
+    if (!localized) return name;
     // Check repeating karanas
     const repIdx = ['Bava','Balava','Kaulava','Taitila','Garija','Vanija','Vishti'].indexOf(name);
-    if (repIdx >= 0) return KARANA_NAMES_REPEATING_HI[repIdx];
+    if (repIdx >= 0) return L_KAR_REP[repIdx];
     // Check fixed karanas
     const fixIdx = ['Shakuni','Chatushpad','Naga','Kimstughna'].indexOf(name);
-    if (fixIdx >= 0) return KARANA_NAMES_FIXED_HI[fixIdx];
+    if (fixIdx >= 0) return L_KAR_FIX[fixIdx];
     return name;
   }
   function locRashi(r: { name: string; lord: string; degree: number; number: number }): { name: string; lord: string; degree: number; number: number } {
-    if (lang !== 'hi') return r;
-    const hi = RASHIS_HI[r.number - 1];
-    return hi ? { ...r, name: hi.name, lord: hi.lord } : r;
+    if (!localized) return r;
+    const t = L_RASHI[r.number - 1];
+    return t ? { ...r, name: t.name, lord: t.lord } : r;
   }
   function locMoonPhase(name: string): string {
-    if (lang !== 'hi') return name;
-    return MOON_PHASES_HI[name] ?? name;
+    if (!localized) return name;
+    return L_MOONPH[name] ?? name;
   }
 
   return {
@@ -543,12 +574,12 @@ export function calculateFullPanchang(
     moonSign: locRashi(moonSign),
     sunSign: locRashi(sunSign),
     moonPhase: { name: locMoonPhase(getMoonPhaseName(tithi.tithiIndex - 1)), illumination: moonIllumination },
-    paksha: lang === 'hi' ? (PAKSHA_HI[tithi.paksha] ?? tithi.paksha) : tithi.paksha,
+    paksha: localized ? (L_PAKSHA[tithi.paksha] ?? tithi.paksha) : tithi.paksha,
     auspiciousMuhurats,
     inauspiciousKalams,
     sunNakshatra: { ...locNakName(sunNak), number: sunNak.number, pada: sunNak.pada, startTime: '', endTime: '', progress: sunNak.progress },
-    ayana: lang === 'hi' ? (AYANA_HI[ayana] ?? ayana) : ayana,
-    ritu: lang === 'hi' && RITU_HI[ritu.vedic] ? RITU_HI[ritu.vedic] : ritu,
+    ayana: localized ? (L_AYANA[ayana] ?? ayana) : ayana,
+    ritu: localized && L_RITU[ritu.vedic] ? L_RITU[ritu.vedic] : ritu,
     solarMonth,
     dinamana: durations.dinamana,
     ratrimana: durations.ratrimana,

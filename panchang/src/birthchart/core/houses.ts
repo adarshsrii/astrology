@@ -91,3 +91,57 @@ export function populateHousePlanets(
 
   return houses;
 }
+
+// ── Sudarshana Chakra ────────────────────────────────────────────────────────
+
+export interface SudarshanaView {
+  reference: 'lagna' | 'moon' | 'sun';
+  referenceSignNumber: number;
+  referenceSignName: string;
+  houses: HouseInfo[];          // the same 12 planets, counted from this reference
+}
+
+export interface SudarshanaChakra {
+  lagna: SudarshanaView;
+  moon: SudarshanaView;
+  sun: SudarshanaView;
+}
+
+/**
+ * Sudarshana Chakra — the same chart read three times: from the Lagna, from the
+ * Moon's sign (Chandra lagna) and from the Sun's sign (Surya lagna). A result
+ * confirmed in all three readings is the classical test of a strong promise.
+ *
+ * ponytail: whole-sign only, and no interpretation — this returns the three
+ * house sets and stops. Reading them is the report's job.
+ */
+export function calculateSudarshanaChakra(
+  planets: GrahaPosition[],
+  lagnaSignNumber: number,
+): SudarshanaChakra {
+  // ponytail: Moon/Sun come out of the same planets array the caller already has,
+  // so there is nothing extra to pass in. Falling back to the lagna sign keeps a
+  // partial planet list from throwing; a real chart always carries both.
+  const signOf = (name: GrahaName): number =>
+    planets.find(p => p.name === name)?.signNumber ?? lagnaSignNumber;
+
+  const view = (
+    reference: SudarshanaView['reference'],
+    referenceSignNumber: number,
+  ): SudarshanaView => {
+    const houses = calculateHouses(referenceSignNumber, 'whole_sign');
+    const assignment = assignPlanetsToHouses(planets, referenceSignNumber, 'whole_sign');
+    return {
+      reference,
+      referenceSignNumber,
+      referenceSignName: SIGN_NAMES[referenceSignNumber] || 'Unknown',
+      houses: populateHousePlanets(houses, planets, assignment),
+    };
+  };
+
+  return {
+    lagna: view('lagna', lagnaSignNumber),
+    moon: view('moon', signOf('Moon')),
+    sun: view('sun', signOf('Sun')),
+  };
+}

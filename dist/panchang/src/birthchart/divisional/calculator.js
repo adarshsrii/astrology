@@ -13,6 +13,16 @@ function normSign(n) {
     return ((n - 1) % 12 + 12) % 12 + 1;
 }
 /** Get element of a sign: 'fire' | 'earth' | 'air' | 'water'. */
+/**
+ * Modality (chara/sthira/dvisvabhava) of a rasi: 0 movable, 1 fixed, 2 dual.
+ * ponytail: (sign-1)%3 IS the modality -- Aries/Cancer/Libra/Capricorn are movable,
+ * and they are exactly the signs where (n-1)%3 === 0. No table needed.
+ */
+function signModality(signNumber) {
+    return (((signNumber - 1) % 3) + 3) % 3;
+}
+/** Start rasi for D16 and D45, indexed by modality: Mesh / Simh / Dhanu. */
+const MODALITY_START_16_45 = [1, 5, 9];
 function signElement(signNumber) {
     const mod = ((signNumber - 1) % 4);
     return ['fire', 'earth', 'air', 'water'][mod];
@@ -110,28 +120,63 @@ function calcD12(sign, deg) {
     return { vargaSign, vargaDeg: deg - partIndex * partSize };
 }
 /**
+ * ⚠ THE NODES IN THE VARGAS — SETTLED, DO NOT "FIX" IT. (audit 2026-09-14)
+ *
+ * Rahu and Ketu are an exact 180° axis in D1, so people expect them opposite in
+ * every varga. They are not, and that is CORRECT: a varga's starting sign is
+ * chosen from a property of the D1 sign, and when that property has period 2
+ * (odd/even) or 3 (movable/fixed/dual) it is unchanged by the +6 signs between
+ * Rahu and Ketu — so both nodes start from the SAME sign and, being at the same
+ * degree, land in the SAME varga sign.
+ *   opposite  : D3 D4 D7 D9 D10 D12 D27 D60  (start is relative to the D1 sign)
+ *   same sign : D2 D24 D30 D40                (start keyed on odd/even)
+ *   same sign : D16 D20 D45                   (start keyed on modality — see below)
+ * Nothing in BPHS Ch.6 carves out the nodes; the amsa rules are applied to a
+ * longitude, whatever body holds it. Forcing Ketu to Rahu's varga sign + 6 is a
+ * software convention, not a Parashari rule.
+ *
+ * ⚠ SEPARATE, REAL DEFECT FOUND IN THE SAME AUDIT — REPORTED, NOT PATCHED:
+ * calcD16 / calcD20 / calcD45 below pick their starting sign by ELEMENT
+ * (signElement, period 4). BPHS Ch.6 keys all three on MODALITY (period 3):
+ *   v16 Shodashāńś  — Mesh for Movable, Simh for Fixed, Dhanu for Dual
+ *   v17 Vimshāńś    — Mesh for Movable, Dhanu for Fixed, Simh for Dual
+ *   v31 Akshavedāńś — Mesh for Movable, Simh for Fixed, Dhanu for Dual
+ * Element and modality agree only for Aries..Cancer, so D16/D20/D45 are wrong
+ * for the 8 signs Leo..Pisces, for EVERY planet, not just the nodes.
+ * How it got in: D9 (v12) is stated relatively — movable from itself, fixed from
+ * the 9th, dual from the 5th — and that IS provably identical to the element
+ * rule for all 12 signs. D16/D20/D45 give ABSOLUTE start signs, where the
+ * shortcut breaks. Fixing them is a one-line change each (index [1,5,9] /
+ * [1,9,5] by (sign-1)%3), but it moves every D16/D20/D45 cell and therefore the
+ * Varga Viswa totals, so it is Saurabh's call, not an engine-level judgement.
+ */
+/**
  * D16 (Shodasamsa): 16 parts of 1.875 deg.
  * Fire signs: start Aries(1), Earth: Leo(5), Air: Sagittarius(9), Water: Aries(1)
  */
 function calcD16(sign, deg) {
     const partSize = 30 / 16;
     const partIndex = Math.min(Math.floor(deg / partSize), 15);
-    const elem = signElement(sign);
-    const startMap = { fire: 1, earth: 5, air: 9, water: 1 };
-    const vargaSign = normSign(startMap[elem] + partIndex);
+    // BPHS Ch.6 v16: "Starting from Mesh for a Movable Rasi, from Simh for a Fixed
+    // Rasi and from Dhanu for a Dual Rasi". That is MODALITY (period 3), not element
+    // (period 4) -- the two agree only for Aries..Cancer, so the old element map was
+    // wrong for the eight signs Leo..Pisces, for every planet.
+    const vargaSign = normSign(MODALITY_START_16_45[signModality(sign)] + partIndex);
     return { vargaSign, vargaDeg: deg - partIndex * partSize };
 }
 /**
  * D20 (Vimsamsa): 20 parts of 1.5 deg.
  * Fire signs: start Aries(1), Earth: Sagittarius(9), Air: Leo(5)
  * Water signs: follow the fire cycle → Aries(1)
+ * ⚠ BPHS v17 keys this on MODALITY, not element — see the audit note above calcD16.
  */
 function calcD20(sign, deg) {
     const partSize = 1.5;
     const partIndex = Math.min(Math.floor(deg / partSize), 19);
-    const elem = signElement(sign);
-    const startMap = { fire: 1, earth: 9, air: 5, water: 1 };
-    const vargaSign = normSign(startMap[elem] + partIndex);
+    // BPHS Ch.6 v17: "From Mesh for a Movable Rasi, from Dhanu for a Fixed Rasi and
+    // from Simh for a Common Rasi". Modality again -- and note the order differs from
+    // D16/D45: here Fixed goes to Dhanu, not Simh.
+    const vargaSign = normSign([1, 9, 5][signModality(sign)] + partIndex);
     return { vargaSign, vargaDeg: deg - partIndex * partSize };
 }
 /**
@@ -202,13 +247,14 @@ function calcD40(sign, deg) {
 /**
  * D45 (Akshavedamsa): 45 parts of 0.667 deg.
  * Fire: Aries(1), Earth: Leo(5), Air: Sagittarius(9), Water: Aries(1)
+ * ⚠ BPHS v31 keys this on MODALITY, not element — see the audit note above calcD16.
  */
 function calcD45(sign, deg) {
     const partSize = 30 / 45;
     const partIndex = Math.min(Math.floor(deg / partSize), 44);
-    const elem = signElement(sign);
-    const startMap = { fire: 1, earth: 5, air: 9, water: 1 };
-    const vargaSign = normSign(startMap[elem] + partIndex);
+    // BPHS Ch.6 v31: "Mesh, Simh and Dhanu are the Rasis, from which the distributions,
+    // respectively, commence for Movable, Immovable and Common Rasis." Same shape as D16.
+    const vargaSign = normSign(MODALITY_START_16_45[signModality(sign)] + partIndex);
     return { vargaSign, vargaDeg: deg - partIndex * partSize };
 }
 /**

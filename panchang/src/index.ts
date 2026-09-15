@@ -539,6 +539,9 @@ export { calculateNakshatra } from './core/nakshatra';
 export { calculateYoga } from './core/yoga';
 export { calculateKarana } from './core/karana';
 export { calculateRashi } from './core/rashi';
+// Shared graha-name map (the ONE table — see core/constants.ts)
+export { grahaName, PLANETS_HI, PLANETS_NE } from './core/constants';
+export type { Lang } from './core/constants';
 
 // Birth Chart (Kundli) module
 export { calculateBirthChart } from './birthchart/index';

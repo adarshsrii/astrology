@@ -3,7 +3,7 @@
  * Birth Chart (Kundli) Module — Public API
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPlanetRemedy = exports.getRemedies = exports.NAKSHATRA_SYLLABLES = exports.getNameSuggestions = exports.calculateShodashvarga = exports.getChartInfo = exports.SHODASHVARGA_CHARTS = exports.calculateDivisionalChart = exports.NAKSHATRA_LORDS = exports.DASHA_SEQUENCE = exports.DASHA_YEARS = exports.calculateVimshottariDasha = exports.calculateAshtakootMilan = exports.detectYogas = exports.analyzeGandanta = exports.analyzeGandaMoola = exports.analyzeKaalSarp = exports.analyzeManglik = exports.calculateShadBala = exports.calculateAspects = exports.NATURAL_FRIENDSHIPS = exports.calculateCompoundFriendships = exports.calculateTemporalFriendships = exports.calculateFriendships = exports.calculateTattvaBalance = exports.generateChartLayouts = exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = exports.getDignitySymbol = exports.determineCombustion = exports.determineDignity = exports.ALL_GRAHAS = exports.calculateBirthChart = void 0;
+exports.getPlanetDirection = exports.PLANET_DIRECTIONS = exports.getPlanetRemedy = exports.getRemedies = exports.NAKSHATRA_SYLLABLES = exports.getNameSuggestions = exports.calculateShodashvarga = exports.getChartInfo = exports.SHODASHVARGA_CHARTS = exports.calculateDivisionalChart = exports.NAKSHATRA_LORDS = exports.DASHA_SEQUENCE = exports.DASHA_YEARS = exports.calculateVimshottariDasha = exports.calculateAshtakootMilan = exports.detectYogas = exports.analyzeGandanta = exports.analyzeGandaMoola = exports.analyzeKaalSarp = exports.analyzeManglik = exports.calculateShadBala = exports.calculateAspects = exports.NATURAL_FRIENDSHIPS = exports.calculateCompoundFriendships = exports.calculateTemporalFriendships = exports.calculateFriendships = exports.calculateTattvaBalance = exports.generateChartLayouts = exports.getHouseLords = exports.getSignName = exports.getSignLord = exports.SIGN_LORDS = exports.calculateSudarshanaChakra = exports.populateHousePlanets = exports.assignPlanetsToHouses = exports.calculateHouses = exports.getDignitySymbol = exports.determineCombustion = exports.determineDignity = exports.ALL_GRAHAS = exports.calculateBirthChart = void 0;
 // Main function
 var birthchart_1 = require("./birthchart");
 Object.defineProperty(exports, "calculateBirthChart", { enumerable: true, get: function () { return birthchart_1.calculateBirthChart; } });
@@ -18,6 +18,12 @@ var houses_1 = require("./core/houses");
 Object.defineProperty(exports, "calculateHouses", { enumerable: true, get: function () { return houses_1.calculateHouses; } });
 Object.defineProperty(exports, "assignPlanetsToHouses", { enumerable: true, get: function () { return houses_1.assignPlanetsToHouses; } });
 Object.defineProperty(exports, "populateHousePlanets", { enumerable: true, get: function () { return houses_1.populateHousePlanets; } });
+Object.defineProperty(exports, "calculateSudarshanaChakra", { enumerable: true, get: function () { return houses_1.calculateSudarshanaChakra; } });
+var lords_1 = require("./core/lords");
+Object.defineProperty(exports, "SIGN_LORDS", { enumerable: true, get: function () { return lords_1.SIGN_LORDS; } });
+Object.defineProperty(exports, "getSignLord", { enumerable: true, get: function () { return lords_1.getSignLord; } });
+Object.defineProperty(exports, "getSignName", { enumerable: true, get: function () { return lords_1.getSignName; } });
+Object.defineProperty(exports, "getHouseLords", { enumerable: true, get: function () { return lords_1.getHouseLords; } });
 var chart_layout_1 = require("./layout/chart-layout");
 Object.defineProperty(exports, "generateChartLayouts", { enumerable: true, get: function () { return chart_layout_1.generateChartLayouts; } });
 // Analysis modules
@@ -59,3 +65,5 @@ Object.defineProperty(exports, "getNameSuggestions", { enumerable: true, get: fu
 Object.defineProperty(exports, "NAKSHATRA_SYLLABLES", { enumerable: true, get: function () { return recommendations_1.NAKSHATRA_SYLLABLES; } });
 Object.defineProperty(exports, "getRemedies", { enumerable: true, get: function () { return recommendations_1.getRemedies; } });
 Object.defineProperty(exports, "getPlanetRemedy", { enumerable: true, get: function () { return recommendations_1.getPlanetRemedy; } });
+Object.defineProperty(exports, "PLANET_DIRECTIONS", { enumerable: true, get: function () { return recommendations_1.PLANET_DIRECTIONS; } });
+Object.defineProperty(exports, "getPlanetDirection", { enumerable: true, get: function () { return recommendations_1.getPlanetDirection; } });

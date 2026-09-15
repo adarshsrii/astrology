@@ -24,7 +24,10 @@ export { ALL_GRAHAS } from './types';
 
 // Sub-modules (for advanced usage)
 export { determineDignity, determineCombustion, getDignitySymbol } from './core/states';
-export { calculateHouses, assignPlanetsToHouses, populateHousePlanets } from './core/houses';
+export { calculateHouses, assignPlanetsToHouses, populateHousePlanets, calculateSudarshanaChakra } from './core/houses';
+export type { SudarshanaView, SudarshanaChakra } from './core/houses';
+export { SIGN_LORDS, getSignLord, getSignName, getHouseLords } from './core/lords';
+export type { HouseLordInfo } from './core/lords';
 export { generateChartLayouts } from './layout/chart-layout';
 
 // Analysis modules
@@ -58,5 +61,5 @@ export { calculateDivisionalChart, SHODASHVARGA_CHARTS, getChartInfo, calculateS
 export type { DivisionalPosition, DivisionalChart, PlanetInput, VargaChartInfo, ShodashvargaEntry, ShodashvargaChartScore } from './divisional';
 
 // Recommendations (Names & Remedies)
-export { getNameSuggestions, NAKSHATRA_SYLLABLES, getRemedies, getPlanetRemedy } from './recommendations';
+export { getNameSuggestions, NAKSHATRA_SYLLABLES, getRemedies, getPlanetRemedy, PLANET_DIRECTIONS, getPlanetDirection } from './recommendations';
 export type { NameSuggestion, NameEntry, PlanetaryRemedy, GemstoneInfo, MantraInfo, CharityInfo, WeakPlanetRemedy, RemedyResult, RemedyPlanetInput } from './recommendations';
