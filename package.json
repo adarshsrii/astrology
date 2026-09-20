@@ -1,6 +1,6 @@
 {
   "name": "astrology-insights",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "Comprehensive Vedic astrology engine for Node.js — Panchang, birth charts (Kundli), Vimshottari Dasha, divisional charts, dosha analysis, and planetary remedies. Swiss Ephemeris precision, validated against Drik Panchang.",
   "main": "index.js",
   "react-native": "index.rn.js",
@@ -8,7 +8,9 @@
     "test": "node test.js",
     "test:unit": "jest",
     "test:unit:watch": "jest --watch",
-    "build": "npx tsc --outDir dist --rootDir . --declaration --skipLibCheck --module commonjs --target ES2020 --esModuleInterop --resolveJsonModule $(find panchang/src -name '*.ts' ! -name '*.d.ts' ! -name '*.bak*')"
+    "build": "npx tsc --outDir dist --rootDir . --declaration --skipLibCheck --module commonjs --target ES2020 --esModuleInterop --resolveJsonModule $(find panchang/src -name '*.ts' ! -name '*.d.ts' ! -name '*.bak*')",
+    "check:dist": "node -e \"for (const m of ['./dist/panchang/src/birthchart/index','./dist/panchang/src/birthchart/divisional/shodashvarga','./dist/panchang/src/panchang-v2']) require(m); console.log('dist loads')\"",
+    "prepublishOnly": "npm run build && npm run check:dist && npm test"
   },
   "files": [
     "index.js",
