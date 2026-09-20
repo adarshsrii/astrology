@@ -231,14 +231,14 @@ console.log(calculateRashi(355.0));          // { name: "Pisces", lord: "Jupiter
 
 #### `calculatePanchang(date, latitude, longitude, timezone, locationName?, lang?)` — legacy v1
 
-The original class-based engine (`PanchangCalculator`), kept for backward compatibility. `date` must be a `Date`. Returns `PanchangOutput` with **`Date` objects whose UTC fields hold the local wall-clock time** (`sunrise.toISOString()` = `"2026-03-21T06:24:16.000Z"` means 06:24 local), `dinamana`/`ratrimana` as `{ hours, minutes, seconds }`, `lunarMonth: { amanta, purnimanta }`, `samvata: { shaka, vikrama, gujarati, name }`, `kalam.{rahu,gulikai,yamaganda}`, `muhurat.*`, `planetaryPositions` for the seven classical planets, and a `formatters` object (`getSunriseFormatted()`, `getRahuKaalFormatted()`, `formatInLocalTimezone(date, pattern)`). The `locationName` and `lang` arguments are accepted but unused.
+The original class-based engine (`PanchangCalculator`), kept for backward compatibility. `date` must be a `Date`. Returns `PanchangOutput` with **`Date` objects whose UTC fields hold the local wall-clock time** (`sunrise.toISOString()` = `"2026-03-21T06:24:16.000Z"` means 06:24 local), `dinamana`/`ratrimana` as `{ hours, minutes, seconds }`, `lunarMonth: { amanta, purnimanta }`, `samvata: { shaka, vikrama, gujarati, name }`, `kalam.{rahu,gulikai,yamaganda}`, `muhurat.*`, `planetaryPositions` for the seven classical planets, and a `formatters` object (`getSunriseFormatted()`, `getRahuKaalFormatted()`, `formatInLocalTimezone(date, pattern)`). The `locationName` and `lang` arguments are accepted but unused. Because the `Date`s already hold local clock time, the `formatters` shift them by the zone offset a second time (`getSunriseFormatted()` prints `"11:54:16"` for the 06:24 sunrise below) — read the UTC fields directly instead.
 
 ```javascript
 const { calculatePanchang } = require("astrology-insights");
 
 const v1 = calculatePanchang(new Date("2026-03-21T00:00:00Z"), 28.6139, 77.209, "Asia/Kolkata");
 console.log(v1.tithi.name, v1.nakshatra.name, v1.yoga.name); // "Tritiya" "Ashwini" "Indra"
-console.log(v1.formatters.getSunriseFormatted());            // "06:24:16"
+console.log(v1.sunrise.toISOString().slice(11, 19));         // "06:24:16"   (UTC fields = local clock)
 console.log(v1.dinamana);                                    // { hours: 12, minutes: 8, seconds: 36 }
 console.log(v1.samvata.vikrama, v1.ayana.drik);              // 2083 "Uttarayana"
 ```
@@ -933,7 +933,7 @@ Responses are `PanchangResult` JSON with `Cache-Control: s-maxage=3600, stale-wh
 
 ```bash
 npm test                # node test.js — smoke run of the legacy helpers and both Panchang engines (prints, no asserts)
-npm run test:unit       # jest — 21 suites, 286 tests (8 skipped without a native swisseph build)
+npm run test:unit       # jest — 21 suites, 286 tests pass, 8 skipped (see below)
 npm run build           # tsc → dist/ for every .ts under panchang/src (what index.rn.js loads)
 npm run check:dist      # requires the dist birthchart, shodashvarga and panchang-v2 entry points
 npm run prepublishOnly  # build + check:dist + npm test — runs automatically on `npm publish`
@@ -949,7 +949,7 @@ node rahu-ketu-nakshatra.check.js      # Rahu/Ketu exactly 180° apart across 19
 node nepali-localization.check.js      # 'ne' returns Nepali, not Hindi; 'en'/'hi' untouched; every yoga has nameNe/descriptionNe
 ```
 
-Jest maps `swisseph` to `__mocks__/swisseph.js` so the unit suite runs without the native addon; the tests that need real positions skip themselves when the mock is detected.
+Jest always maps `swisseph` to `__mocks__/swisseph.js` (see `jest.config.js`), so the unit suite runs without the native addon and the 8 tests that need real planetary positions skip themselves. The root `*.check.js` scripts and `npm test` use the real addon.
 
 ---
 
