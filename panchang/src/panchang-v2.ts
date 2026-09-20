@@ -222,6 +222,31 @@ export function calculateFullPanchang(
     // No SunCalc available
   }
 
+  // ── Moonrise / moonset, properly ──────────────────────────────────────────
+  // SunCalc's answer above is kept ONLY as a fallback. It is geocentric, and
+  // measured against twenty published Karwa Chauth tables it runs a flat 17
+  // minutes early — see timings/moonrise.ts for the measurements and the cause.
+  // The moon is the one body where parallax near the horizon is worth a degree,
+  // so it gets the topocentric treatment.
+  //
+  // The sweep starts at LOCAL midnight of the requested day, not at the
+  // machine's midnight, which is what SunCalc.getMoonTimes silently used — that
+  // returns a different day's moon for anyone viewing a place they are not in.
+  try {
+    const { moonRiseSet } = require('./timings/moonrise');
+    // Local midnight = local noon minus twelve hours, in the TARGET zone.
+    const localNoonParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone, hour: 'numeric', hour12: false,
+    }).format(noonDate);
+    const offsetHours = 12 - Number(localNoonParts);   // machine noon vs local hour
+    const localMidnight = new Date(noonDate.getTime() - (12 - offsetHours) * 3600000);
+    const ev = moonRiseSet(localMidnight, latitude, longitude, 0);
+    if (ev.rise) moonrise = ev.rise;
+    if (ev.set) moonset = ev.set;
+  } catch {
+    // Keep the SunCalc values rather than showing nothing.
+  }
+
   // Compute longitudes at SUNRISE (Drik Panchang convention: prevailing tithi at sunrise)
   const sunriseDate = sunrise ?? noonDate;
   const lons = computeLongitudes(sunriseDate, ayanamsa);
@@ -499,7 +524,13 @@ export function calculateFullPanchang(
 
   if (sunriseStr && sunsetStr) {
     try {
-      auspiciousMuhurats = calculateMuhurats(sunriseStr, sunsetStr, dateStr, latitude, longitude, timezone);
+      // Pradosh Vrat follows the tithi that PREVAILS AT SUNSET, not the one at
+      // sunrise that the rest of the panchang reports — tithi2 is exactly that
+      // when the tithi changed during the day. `number` is paksha-relative
+      // (1–15), so 13 is Trayodashi in BOTH pakshas, which is right: Pradosh is
+      // observed twice a month.
+      const isPradoshDay = (tithi2 ?? tithi).number === 13;
+      auspiciousMuhurats = calculateMuhurats(sunriseStr, sunsetStr, dateStr, latitude, longitude, timezone, isPradoshDay);
     } catch {
       // Timing calculation failed; return empty array
     }
@@ -590,4 +621,75 @@ export function calculateFullPanchang(
     hinduMonth,
     hinduMonthAmanta,
   };
+}
+
+/**
+ * The next Pradosh Vrat on or after `from`, or null if none inside `maxDays`.
+ *
+ * ⚠ IT READS THE WINDOW BACK OUT OF calculateFullPanchang RATHER THAN
+ * RECOMPUTING IT. There is exactly one definition of the window — the push
+ * site in timings/muhurat.ts — so the "next Pradosh" line on the home screen
+ * can never disagree with the row that appears on the day itself. Recomputing
+ * sunset + 48 here would be the second definition, and this repo already has a
+ * live example of that going wrong (sayahnaSandhya is sunset+72min in
+ * timings/muhurat.ts and sunset±12min in panchang/index.ts).
+ *
+ * COST, MEASURED NOT GUESSED: calculateFullPanchang is ~23ms on a laptop, so a
+ * blind day-by-day scan averages ~7 calls and worst-cases at 15. On a budget
+ * Android that is seconds of blocked JS. So the tithi number gives a first
+ * guess — tithis advance about one a day — and only a small window around it is
+ * actually computed. The linear sweep stays as a fallback because tithi length
+ * runs 19–26h and the guess can legitimately be a day or two out.
+ */
+export function findNextPradosh(
+  from: Date,
+  latitude: number,
+  longitude: number,
+  timezone: string,
+  maxDays = 32,
+): { date: Date; startTime: string; endTime: string; daysAhead: number } | null {
+  const dayMs = 86400000;
+  const noon = (d: Date) => {
+    const n = new Date(d);
+    n.setHours(12, 0, 0, 0);
+    return n;
+  };
+  const start = noon(from);
+
+  const pradoshOn = (offset: number) => {
+    if (offset < 0 || offset > maxDays) return null;
+    const d = new Date(start.getTime() + offset * dayMs);
+    const p = calculateFullPanchang(d, latitude, longitude, timezone);
+    const m = (p.auspiciousMuhurats || []).find((x: any) => x.name === 'Pradosh Vrat');
+    return m ? { date: d, startTime: m.startTime, endTime: m.endTime, daysAhead: offset } : null;
+  };
+
+  // Guess from today's tithi at sunset. `number` is paksha-relative (1–15), so
+  // Trayodashi is 13 in BOTH halves of the month — Pradosh comes round twice.
+  let guess = 1;
+  try {
+    const today = calculateFullPanchang(start, latitude, longitude, timezone);
+    const list: any[] = Array.isArray(today.tithi) ? today.tithi : [today.tithi];
+    const n = list[list.length - 1]?.number;
+    if (typeof n === 'number' && n >= 1 && n <= 15) guess = n <= 13 ? 13 - n : 15 - n + 13;
+  } catch {
+    // No guess available — the sweep below still finds it.
+  }
+
+  // Nearest-first around the guess, so the common case is one or two calls.
+  const tried = new Set<number>();
+  for (const offset of [guess, guess - 1, guess + 1, guess - 2, guess + 2, guess + 3]) {
+    if (offset < 0 || tried.has(offset)) continue;
+    tried.add(offset);
+    const hit = pradoshOn(offset);
+    if (hit) return hit;
+  }
+  // Fallback: the guess was wrong by more than two days. Rare, but a missing
+  // date on screen is worse than a slow one.
+  for (let i = 0; i <= maxDays; i++) {
+    if (tried.has(i)) continue;
+    const hit = pradoshOn(i);
+    if (hit) return hit;
+  }
+  return null;
 }

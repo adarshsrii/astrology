@@ -40,8 +40,14 @@ function toHHMM(time) {
  * @param lat     - latitude
  * @param lon     - longitude
  * @param tz      - IANA timezone
+ * @param isPradoshDay - Trayodashi at SUNSET (either paksha). Optional, and
+ *   defaults to false so every existing caller keeps its current output
+ *   byte-for-byte.
  */
-function calculateMuhurats(sunrise, sunset, date, lat, lon, tz) {
+/** Length of the Pradosh Vrat window after sunset. 2 ghatis — see the note at
+ *  its push site for why, and for the readings this does not follow. */
+const PRADOSH_MINUTES = 48;
+function calculateMuhurats(sunrise, sunset, date, lat, lon, tz, isPradoshDay = false) {
     const sunriseMin = parseTimeToMinutes(sunrise);
     const sunsetMin = parseTimeToMinutes(sunset);
     const dayDuration = sunsetMin - sunriseMin; // minutes of daytime
@@ -111,6 +117,49 @@ function calculateMuhurats(sunrise, sunset, date, lat, lon, tz) {
         endTime: minutesToHHMM(sunsetMin + 22),
         description: 'Cow-dust time around sunset, auspicious for marriages & ceremonies',
     });
+    // 5b. Pradosh Vrat — the Trayodashi twilight, twice a lunar month.
+    //
+    // ⚠ IT IS CALLED "PRADOSH VRAT", NOT "PRADOSH KAAL", AND THAT IS DELIBERATE.
+    // Checked on the web 2026-09-20 because Saurabh asked whether Pradosh is not
+    // a daily thing — and he was right to ask. The popular sources contradict
+    // each other: some define Pradosh KAAL as the twilight around sunset that
+    // occurs EVERY day (Drik's own wording, "Trayodashi Tithi falls during
+    // Pradosh Kaal", only makes sense if the Kaal also exists on other days),
+    // while others say it happens only twice a month. The Sanskrit pradoṣa just
+    // means dusk, so the daily reading has the better of it.
+    // Labelling a Trayodashi-only row "Pradosh Kaal" would have the app assert
+    // that the window does not exist on the other thirteen days, which is a side
+    // this app has no business taking. "Pradosh Vrat" is the observance, it is
+    // unambiguously Trayodashi-only, and it is what people actually look up.
+    //
+    // ⚠ NOT A CLASSICAL MUHURTA. I checked the ten extracted texts before adding
+    // it: "pradosh" appears TWICE in the whole corpus, both in Prasna Marga
+    // ("XVI. Pradosha: At dusk, i.e., just before and immediately after sunset"
+    // and a glossary line "Pradosha ... Twilight"), and ZERO times in muhurta.txt,
+    // the dedicated muhurta text. It is a Shaivite VRATA convention, not Vedic
+    // muhurta — so it is offered on the day it is observed, and not presented as
+    // something the shastras time to the minute.
+    //
+    // ⚠⚠ THE WINDOW IS UNSETTLED AND NO SOURCE AGREES. Checked on the web
+    // 2026-09-20 after Saurabh asked, and I had to withdraw my own earlier claim
+    // that 48 min is "what Drik Panchang publishes" — DRIK PUBLISHES NO DURATION
+    // AT ALL. It says only "Pradosh Kaal which starts after Sunset" and prints
+    // the Trayodashi overlap. What the popular sources actually say:
+    //   drikpanchang.com  no duration given, just "starts after Sunset"
+    //   anytimeastro      1.5 h BEFORE sunset to 1 h after  (~2.5 h total)
+    //   others            45 min either side (~1.5 h), or 2 h 24 min from sunset
+    //   Prasna Marga      "just before and immediately after sunset" — no number
+    // 48 min (2 ghatis) is a defensible reading and is the narrowest, so it
+    // cannot swallow Godhuli or Sayahna Sandhya, which also key off sunset. It is
+    // NOT the consensus, because there is no consensus. One constant to change.
+    if (isPradoshDay) {
+        muhurats.push({
+            name: 'Pradosh Vrat',
+            startTime: minutesToHHMM(sunsetMin),
+            endTime: minutesToHHMM(sunsetMin + PRADOSH_MINUTES),
+            description: 'Trayodashi twilight — the window for Pradosh Vrat worship of Shiva',
+        });
+    }
     // 6. Sayahna Sandhya — from sunset to sunset + 1.5 night muhurtas
     // Mirrors Pratah Sandhya: Pratah = 1.5 night muhurtas before sunrise, Sayahna = 1.5 after sunset
     const sayahnaEnd = sunsetMin + (nightMuhurta * 1.5);
